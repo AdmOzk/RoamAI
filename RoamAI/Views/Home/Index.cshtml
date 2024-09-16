@@ -1,8 +1,121 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewBag.Title = "RoamAI - Travel Planner";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container mt-5">
+    <h2>RoamAI - Plan Your Perfect Trip</h2>
+
+    <!-- Form for city, hotel, and trip content -->
+    <form id="trip-form">
+        <div class="form-group">
+            <label for="city">Select City</label>
+            <select id="city" name="City" class="form-control" required>
+                <option value="">Select...</option>
+                <option value="Istanbul">Istanbul</option>
+                <option value="Ankara">Ankara</option>
+                <!-- Add more cities as needed -->
+            </select>
+        </div>
+
+        <div class="form-group mt-3">
+            <label for="hotel">Select Hotel (Doğuş Hotels)</label>
+            <select id="hotel" name="Hotel" class="form-control" required>
+                <option value="">Select...</option>
+                <option value="Dogus Hotel Istanbul">Doğuş Hotel Istanbul</option>
+                <option value="Dogus Hotel Ankara">Doğuş Hotel Ankara</option>
+                <!-- Add more hotels as needed -->
+            </select>
+        </div>
+
+        <div class="form-group mt-3">
+            <label for="tripContent">Select Trip Content (%)</label>
+            <input type="text" id="tripContent" name="TripContent" class="form-control" placeholder="e.g., 30% Historical, 50% Cultural, 20% Food" required />
+        </div>
+
+        <button type="button" class="btn btn-primary mt-4" id="submitBtn">Show Travel Map and City Info</button>
+    </form>
+
+    <!-- Travel Map and City Info Sections -->
+    <div id="travel-section" class="mt-5" style="display:none;">
+        <!-- Travel Map (Initially Disabled) -->
+        <div id="travelMap" class="alert alert-info">
+            <h4>Travel Map</h4>
+            <p>The personalized travel map will be shown here once activated.</p>
+        </div>
+
+        <!-- City Info Section (Initially Disabled) -->
+        <div id="city-info-section" class="mt-5">
+            <h4>City Information</h4>
+            <div id="city-content">
+                <!-- City-specific content will be injected here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Warnings Section -->
+    <div id="warnings-section" class="mt-5">
+        <h4>Warnings</h4>
+        <div class="alert alert-warning" id="dateWarning" style="display:none;">
+            <p>There are no warnings at this moment.</p>
+        </div>
+    </div>
 </div>
+
+<!-- jQuery CDN -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- Custom Script -->
+<script>
+    $(document).ready(function () {
+        $('#submitBtn').click(function () {
+            var selectedCity = $('#city').val(); // Get selected city value
+            var cityContent = '';
+
+            if (selectedCity === 'Istanbul') {
+                cityContent = `
+                        <div class="d-flex align-items-start">
+                            <img src="/images/avatar0.png" alt="Avatar" class="rounded-circle mr-3" style="width:100px; height:100px;">
+                            <div>
+                                    <p>Istanbul is a city where history meets modernity, offering a treasure trove of experiences. In this guide, we uncover the top five attractions you can't miss in 2024. Our journey starts at the Spice Bazaar, a feast for the senses, where colorful stalls filled with aromatic spices, sweet treats, and traditional Turkish delights create a vibrant shopping experience. Next, take in breathtaking views of the city's iconic landmarks with a scenic Bosphorus cruise, providing a unique perspective of Istanbul's historic palaces and picturesque waterfronts. Step into the Basilica Cistern, an underground marvel from the Byzantine era, where majestic columns and tranquil reflecting pools reveal a fascinating glimpse of the city's ancient past. At number two, explore the Grand Bazaar, one of the world's oldest and largest covered markets, offering everything from exquisite jewelry to vibrant textiles, making it a paradise for shoppers. Finally, the Hagia Sophia, an architectural masterpiece with a rich history as a church, mosque, and now a museum, tops our list for its stunning mosaics, grand dome, and historical significance. </p>
+                                <audio controls>
+                                    <source src="/audio/city-guide.mp3" type="audio/mpeg">
+                                    Your browser does not support the audio element.
+                                </audio>
+                            </div>
+                        </div>`;
+            } else if (selectedCity === 'Ankara') {
+                cityContent = `
+                        <div class="d-flex align-items-start">
+                            <img src="/images/avatar1.png" alt="Avatar" class="rounded-circle mr-3" style="width:100px; height:100px;">
+                            <div>
+                                    <p>
+    Located in the heart of Anatolia, Ankara is a city rich in history and culture. In this quick tour, we explore some of its most famous attractions, starting with Anıtkabir, the mausoleum of Mustafa Kemal Atatürk, where visitors can pay their respects and learn about the founder of modern Turkey. Next is Kızılay Square, the bustling central hub filled with shops, restaurants, and cafes. The historic Ankara Citadel, dating back to the Roman Empire, offers panoramic views of the city. The Museum of Anatolian Civilizations showcases artifacts that highlight the region's diverse history. Atakule Tower provides stunning views from its observation deck, while Ulus, the oldest district, invites exploration of narrow streets, traditional houses, and Ottoman-era architecture. Bahçeli 7th Avenue is a lively street filled with shops and Turkish cuisine. Youth Park offers relaxation and outdoor activities in a large green space, and the Hacı Bayram Mosque stands as a beautiful 15th-century religious landmark. Finally, the Atatürk Forest Farm, just outside the city, is perfect for picnics and leisurely walks. With so much more to offer, Ankara is a city that deserves a longer visit to fully experience its vibrant charm.</p>
+                                <audio controls>
+                                    <source src="/audio/city-guide2.mp3" type="audio/mpeg">
+                                    Your browser does not support the audio element.
+                                </audio>
+                            </div>
+                        </div>`;
+            }
+
+            if (cityContent !== '') {
+                $('#city-content').html(cityContent); // Insert content into city info section
+                $('#city-info-section').fadeIn(); // Show the city info section
+            }
+
+            // Show the travel map section
+            $('#travel-section').fadeIn();
+
+            // Example warning conditions
+            var tripDate = $('#tripDate').val(); // Assuming you have a tripDate field somewhere
+            if (tripDate === '2024-10-29') {
+                $('#dateWarning').text('October 29th is a national holiday (Republic Day).').show();
+            } else if (tripDate === '2024-09-17') {
+                $('#dateWarning').text('Rain expected on this day. Please prepare accordingly.').show();
+            } else {
+                $('#dateWarning').text('No warnings, safe travels!').show();
+            }
+        });
+    });
+</script>
