@@ -9,19 +9,22 @@
     <!-- Form for city, hotel, and trip content -->
     <form id="trip-form">
         <div class="form-group">
+            <label for="country">Select Country</label>
+            <select id="country" name="Country" class="form-control" required>
+                
+            </select>
+        </div>
+
+        <div class="form-group mt-3">
             <label for="city">Select City</label>
             <select id="city" name="City" class="form-control" required>
-                <option value="">Select...</option>
-                <option value="Istanbul">Istanbul</option>
-                <option value="Ankara">Ankara</option>
-                <!-- Add more cities as needed -->
+                
             </select>
         </div>
 
         <div class="form-group mt-3">
             <label for="hotel">Select Hotel (Doğuş Hotels)</label>
-            <select id="hotel" name="Hotel" class="form-control" required>
-                <option value="">Select...</option>
+            <select id="hotel" name="Hotel" class="form-control" required>               
                 <option value="Dogus Hotel Istanbul">Doğuş Hotel Istanbul</option>
                 <option value="Dogus Hotel Ankara">Doğuş Hotel Ankara</option>
                 <!-- Add more hotels as needed -->
@@ -68,35 +71,73 @@
 <!-- Custom Script -->
 <script>
     $(document).ready(function () {
+        var citiesData = []; 
+        $.getJSON('/data/countries.json', function (data) {
+            var $countrySelect = $('#country');
+            $.each(data, function (index, country) {
+                $countrySelect.append($('<option>', {
+                    value: country.countryId,
+                    text: country.name
+                }));
+            });
+        }).fail(function () {
+            console.error('Failed to load countries.json');
+        });
+
+        $.getJSON('/data/cities.json', function (data) {
+            citiesData = data; // Store the cities data
+        }).fail(function () {
+            console.error('Failed to load cities.json');
+        });
+
+        $('#country').change(function () {
+            var selectedCountryId = $(this).val();
+            var $citySelect = $('#city');
+            $citySelect.empty(); // Clear existing options
+            $citySelect.append($('<option>', { value: '', text: 'Select...' }));
+
+            if (selectedCountryId) {              
+                var filteredCities = citiesData.filter(function (city) {
+                    return city.countryId === selectedCountryId;
+                });
+
+                $.each(filteredCities, function (index, city) {
+                    $citySelect.append($('<option>', {
+                        value: city.id,
+                        text: city.name
+                    }));
+                });
+            }
+        });
+
         $('#submitBtn').click(function () {
             var selectedCity = $('#city').val(); // Get selected city value
             var cityContent = '';
 
             if (selectedCity === 'Istanbul') {
                 cityContent = `
-                        <div class="d-flex align-items-start">
-                            <img src="/images/avatar0.png" alt="Avatar" class="rounded-circle mr-3" style="width:100px; height:100px;">
-                            <div>
-                                    <p>Istanbul is a city where history meets modernity, offering a treasure trove of experiences. In this guide, we uncover the top five attractions you can't miss in 2024. Our journey starts at the Spice Bazaar, a feast for the senses, where colorful stalls filled with aromatic spices, sweet treats, and traditional Turkish delights create a vibrant shopping experience. Next, take in breathtaking views of the city's iconic landmarks with a scenic Bosphorus cruise, providing a unique perspective of Istanbul's historic palaces and picturesque waterfronts. Step into the Basilica Cistern, an underground marvel from the Byzantine era, where majestic columns and tranquil reflecting pools reveal a fascinating glimpse of the city's ancient past. At number two, explore the Grand Bazaar, one of the world's oldest and largest covered markets, offering everything from exquisite jewelry to vibrant textiles, making it a paradise for shoppers. Finally, the Hagia Sophia, an architectural masterpiece with a rich history as a church, mosque, and now a museum, tops our list for its stunning mosaics, grand dome, and historical significance. </p>
-                                <audio controls>
-                                    <source src="/audio/city-guide.mp3" type="audio/mpeg">
-                                    Your browser does not support the audio element.
-                                </audio>
-                            </div>
-                        </div>`;
+                    <div class="d-flex align-items-start">
+                        <img src="/images/avatar0.png" alt="Avatar" class="rounded-circle mr-3" style="width:100px; height:100px;">
+                        <div>
+                            <p>Istanbul is a city where history meets modernity...</p>
+                            <audio controls>
+                                <source src="/audio/city-guide.mp3" type="audio/mpeg">
+                                Your browser does not support the audio element.
+                            </audio>
+                        </div>
+                    </div>`;
             } else if (selectedCity === 'Ankara') {
                 cityContent = `
-                        <div class="d-flex align-items-start">
-                            <img src="/images/avatar1.png" alt="Avatar" class="rounded-circle mr-3" style="width:100px; height:100px;">
-                            <div>
-                                    <p>
-    Located in the heart of Anatolia, Ankara is a city rich in history and culture. In this quick tour, we explore some of its most famous attractions, starting with Anıtkabir, the mausoleum of Mustafa Kemal Atatürk, where visitors can pay their respects and learn about the founder of modern Turkey. Next is Kızılay Square, the bustling central hub filled with shops, restaurants, and cafes. The historic Ankara Citadel, dating back to the Roman Empire, offers panoramic views of the city. The Museum of Anatolian Civilizations showcases artifacts that highlight the region's diverse history. Atakule Tower provides stunning views from its observation deck, while Ulus, the oldest district, invites exploration of narrow streets, traditional houses, and Ottoman-era architecture. Bahçeli 7th Avenue is a lively street filled with shops and Turkish cuisine. Youth Park offers relaxation and outdoor activities in a large green space, and the Hacı Bayram Mosque stands as a beautiful 15th-century religious landmark. Finally, the Atatürk Forest Farm, just outside the city, is perfect for picnics and leisurely walks. With so much more to offer, Ankara is a city that deserves a longer visit to fully experience its vibrant charm.</p>
-                                <audio controls>
-                                    <source src="/audio/city-guide2.mp3" type="audio/mpeg">
-                                    Your browser does not support the audio element.
-                                </audio>
-                            </div>
-                        </div>`;
+                    <div class="d-flex align-items-start">
+                        <img src="/images/avatar1.png" alt="Avatar" class="rounded-circle mr-3" style="width:100px; height:100px;">
+                        <div>
+                            <p>Located in the heart of Anatolia, Ankara is a city rich in history...</p>
+                            <audio controls>
+                                <source src="/audio/city-guide2.mp3" type="audio/mpeg">
+                                Your browser does not support the audio element.
+                            </audio>
+                        </div>
+                    </div>`;
             }
 
             if (cityContent !== '') {
