@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using RoamAI.Context;
+using RoamAI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,7 +13,8 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.Requ
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultUI();  // Identity UI'yi ekledik
 
-
+builder.Services.AddControllersWithViews();
+builder.Services.AddTransient<ClaudeService>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();

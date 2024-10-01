@@ -1,0 +1,35 @@
+﻿@model TravelRequestModel
+
+<div>
+    <h2>Travel Planı Oluştur</h2>
+    <form method="post" asp-action="GetRecommendations" asp-controller="Travel">
+        <label>Ülke: </label>
+        <input type="text" name="country" required />
+        <br />
+
+        <label>Şehir: </label>
+        <input type="text" name="city" required />
+        <br />
+
+        <label>Gideceğiniz Tarih: </label>
+        <input type="date" name="travelDate" required />
+        <br />
+
+        <label>Gezi Türü Yüzdesi: </label>
+        <input type="text" name="preferences" required placeholder="%40 Kültürel , %40 Modern , %20 Yemek" />
+        <br />
+
+        <button type="submit">Plan Oluştur</button>
+    </form>
+
+    @if (Model != null && Model.Recommendations != null && Model.Recommendations.Any())
+    {
+        <h3>Gezilecek Yerler</h3>
+        <ul>
+            @foreach (var recommendation in Model.Recommendations)
+            {
+                <li>@recommendation</li>
+            }
+        </ul>
+    }
+</div>
