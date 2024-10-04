@@ -4,11 +4,15 @@
     <h2>Travel Planı Oluştur</h2>
     <form method="post" asp-action="GetRecommendations" asp-controller="Travel">
         <label>Ülke: </label>
-        <input type="text" name="country" required />
+        <select id="country" name="country" class="choices" required>
+            <option value="">Select Country</option>
+        </select>
         <br />
 
         <label>Şehir: </label>
-        <input type="text" name="city" required />
+        <select id="city" name="city" required>
+            <option value="">Select City</option>
+        </select>
         <br />
 
         <label>Gideceğiniz Tarih: </label>
@@ -33,3 +37,62 @@
         </ul>
     }
 </div>
+
+<!-- Choices.js CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+
+<!-- jQuery CDN -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- Choices.js JS -->
+<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+
+<!-- Custom Script -->
+<script>
+    $(document).ready(function () {
+        // Sadece ülke select kutusuna Choices.js uygula
+        const countrySelect = new Choices('#country', {
+            searchEnabled: true,
+            placeholderValue: 'Ülke Seçiniz',
+            searchPlaceholderValue: 'Aramak için yazın...'
+        });
+
+        var citiesData = [];
+        $.getJSON('/data/countries.json', function (data) {
+            // Ülkeler için seçenekler ekle
+            countrySelect.setChoices(data.map(country => ({
+                value: country.countryId,
+                label: country.name
+            })), 'value', 'label', true);
+        }).fail(function () {
+            console.error('Failed to load countries.json');
+        });
+
+        $.getJSON('/data/cities.json', function (data) {
+            citiesData = data; // Şehir verilerini depola
+        }).fail(function () {
+            console.error('Failed to load cities.json');
+        });
+
+        $('#country').change(function () {
+            var selectedCountryId = $(this).val();
+            var $citySelect = $('#city');
+            $citySelect.empty(); // Önceki şehirleri temizle
+            $citySelect.append($('<option>', { value: '', text: 'Select City' }));
+
+            if (selectedCountryId) {
+                var filteredCities = citiesData.filter(function (city) {
+                    return city.countryId === selectedCountryId;
+                });
+
+                // Şehirleri normal select kutusuna ekle
+                $.each(filteredCities, function (index, city) {
+                    $citySelect.append($('<option>', {
+                        value: city.id,
+                        text: city.name
+                    }));
+                });
+            }
+        });
+    });
+</script>
