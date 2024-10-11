@@ -13,6 +13,8 @@ namespace RoamAI.Services
     {
         private readonly AmazonBedrockRuntimeClient _runtimeClient;
 
+        private static Dictionary<string, string> locationCoordinates = new Dictionary<string, string>();
+
         public ClaudeService(IConfiguration configuration)
         {
             var accessKeyId = configuration["AWS:AccessKeyId"];
@@ -29,10 +31,15 @@ namespace RoamAI.Services
             _runtimeClient = new AmazonBedrockRuntimeClient(credentials, config);
         }
 
-        public async Task<string> GetTravelRecommendations(string country, string city, string travelDate, string travelPreferences)
+        public async Task<string> GetTravelRecommendations(string country, string city, string travelDate, int culturalPercentage, int modernPercentage, int foodPercentage)
         {
-            var systemPrompt = $"Ülke-şehir-gideceği tarih: {country}-{city}-{travelDate}, gezi türü yüzdesi: {travelPreferences}. " +
-               "Belirtilen yüzdelere göre gezilecek toplamda 5 yer ve konumlarını kordinatlarıyla öner. Ayrıca, gittiği günün milli  bayram olup olmadığını belirt. Yanıtı liste formatında ver.";
+            // Yüzdelik değerleri dinamik olarak yerleştiriyoruz
+            var systemPrompt = $"Ülke-şehir-gideceği tarih: {country}-{city}-{travelDate}, gezi türü yüzdesi: %Kültürel: {culturalPercentage}, %Modern: {modernPercentage}, %Yemek: {foodPercentage}. " +
+            "Belirtilen yüzdelere göre gezilecek toplamda tam 5 yer ve konumlarını şu formatta öner: \n" +
+            $"- Kültürel (%{culturalPercentage}):\n1. Yer İsmi (Koordinatlar: xx.xxxx°N, xx.xxxx°E)\n2. Yer İsmi (Koordinatlar: xx.xxxx°N, xx.xxxx°E)\n" +
+            $"- Modern (%{modernPercentage}):\n3. Yer İsmi (Koordinatlar: xx.xxxx°N, xx.xxxx°E)\n" +
+            $"- Yemek Üzerine (%{foodPercentage}):\n4. Yer İsmi (Koordinatlar: xx.xxxx°N, xx.xxxx°E)\n5. Yer İsmi (Koordinatlar: xx.xxxx°N, xx.xxxx°E)\n" +
+            "Son olarak, eğer gidilen tarihte milli bir bayram varsa belirt, yoksa şu mesajı ver: 'Not: {travelDate} tarihi, {country} bölgesinde herhangi bir milli bayrama denk gelmiyor.' Yanıtın her zaman bu formatta olmalı.";
 
             var input = new
             {
@@ -42,7 +49,7 @@ namespace RoamAI.Services
             new
             {
                 role = "user",
-                content = $"{country}-{city}-{travelDate}, {travelPreferences}"
+                content = $"{country}-{city}-{travelDate}, %Kültürel: {culturalPercentage}, %Modern: {modernPercentage}, %Yemek: {foodPercentage}"
             }
         },
                 max_tokens = 10000,
@@ -68,18 +75,52 @@ namespace RoamAI.Services
             {
                 var responseBody = await reader.ReadToEndAsync();
 
-                // JSON yanıtını deserialization işlemi yap
+                // JSON yanıtını parse et
                 var jsonDocument = JsonDocument.Parse(responseBody);
                 var root = jsonDocument.RootElement;
 
                 // content içindeki metni al
                 if (root.TryGetProperty("content", out var contentArray) && contentArray.ValueKind == JsonValueKind.Array)
                 {
+                    int index = 0;
+
                     foreach (var content in contentArray.EnumerateArray())
                     {
                         if (content.TryGetProperty("text", out var textElement) && textElement.ValueKind == JsonValueKind.String)
                         {
-                            return textElement.GetString(); // text alanını döndür
+                            var fullText = textElement.GetString(); // Tüm yanıtı burada alıyoruz.
+
+                            // Satırları ayırıyoruz
+                            var lines = fullText.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+
+                            // travelLocations array'ine kaydet
+                            foreach (var line in lines)
+                            {
+                                // Lokasyon isimlerini ve koordinatlarını içeren satırları seçiyoruz
+                                if (line.Contains("Koordinatlar:"))
+                                {
+                                    // a. Roma Köprüsü (Koordinatlar: 35.5667° N, 6.1833° E)
+                                    // Burada yer ismini ve koordinatları ayıklıyoruz
+                                    var location = line.Split(new[] { ".", "(", "Koordinatlar:" }, StringSplitOptions.RemoveEmptyEntries)[1].Trim();
+
+                                    var coordinates = line.Substring(line.IndexOf("Koordinatlar:") + "Koordinatlar:".Length)
+                        .Trim() // Boşlukları temizle
+                        .TrimEnd(')'); // Sondaki ")" karakterini temizle
+                                       // Konum ve koordinatları birleştirip diziye kaydediyoruz
+                                    locationCoordinates.Add(location, coordinates);
+                                    index++;
+                                }
+                            }
+
+                            // Diziyi yazdır
+                            Console.WriteLine("Önerilen Seyahat Yerleri:");
+                            foreach (var entry in locationCoordinates)
+                            {
+                                Console.WriteLine($"{entry.Key} {entry.Value}");
+                            }
+
+                            // Tüm yanıtı döndür (text alanını olduğu gibi döndür)
+                            return fullText;
                         }
                     }
                 }

@@ -4,26 +4,34 @@
     <h2>Travel Planı Oluştur</h2>
     <form method="post" asp-action="GetRecommendations" asp-controller="Travel">
         <label>Ülke: </label>
-        <select id="country" name="country" class="choices" required>
+        <select id="country" name="Country" class="choices" required>
             <option value="">Select Country</option>
         </select>
         <br />
 
         <label>Şehir: </label>
-        <select id="city" name="city" required>
+        <select id="city" name="City" required>
             <option value="">Select City</option>
         </select>
         <br />
 
         <label>Gideceğiniz Tarih: </label>
-        <input type="date" name="travelDate" required />
+        <input type="date" name="TravelDate" required />
         <br />
 
-        <label>Gezi Türü Yüzdesi: </label>
-        <input type="text" name="preferences" required placeholder="%40 Kültürel , %40 Modern , %20 Yemek" />
+        <label>Kültürel Gezi Yüzdesi: </label>
+        <input type="number" name="CulturalPercentage" required min="0" max="100" value="40" />
         <br />
 
-        <button type="submit">Plan Oluştur</button>
+        <label>Modern Gezi Yüzdesi: </label>
+        <input type="number" name="ModernPercentage" required min="0" max="100" value="30" />
+        <br />
+
+        <label>Yemek Üzerine Gezi Yüzdesi: </label>
+        <input type="number" name="FoodPercentage" required min="0" max="100" value="30" />
+        <br />
+
+        <button type="submit" id="submitBtn">Plan Oluştur</button>
     </form>
 
     @if (Model != null && Model.Recommendations != null && Model.Recommendations.Any())
@@ -50,7 +58,7 @@
 <!-- Custom Script -->
 <script>
     $(document).ready(function () {
-        // Sadece ülke select kutusuna Choices.js uygula
+        // Choices.js ülke select kutusuna uygula
         const countrySelect = new Choices('#country', {
             searchEnabled: true,
             placeholderValue: 'Ülke Seçiniz',
@@ -85,13 +93,26 @@
                     return city.countryId === selectedCountryId;
                 });
 
-                // Şehirleri normal select kutusuna ekle
+                // Şehirleri select kutusuna ekle
                 $.each(filteredCities, function (index, city) {
                     $citySelect.append($('<option>', {
                         value: city.id,
                         text: city.name
                     }));
                 });
+            }
+        });
+
+        // Yüzde kontrolü: Toplam %100 olmalı
+        $('#submitBtn').click(function (e) {
+            var cultural = parseInt($('input[name="CulturalPercentage"]').val(), 10) || 0;
+            var modern = parseInt($('input[name="ModernPercentage"]').val(), 10) || 0;
+            var food = parseInt($('input[name="FoodPercentage"]').val(), 10) || 0;
+            var total = cultural + modern + food;
+
+            if (total !== 100) {
+                e.preventDefault(); // Formun gönderilmesini engelle
+                alert('Gezi türü yüzdelerinin toplamı 100 olmalıdır!');
             }
         });
     });

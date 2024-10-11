@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using RoamAI.Services;
 using RoamAI.Models;
+using System.Linq;
 
 namespace RoamAI.Controllers
 {
@@ -21,19 +22,24 @@ namespace RoamAI.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> GetRecommendations(string country, string city, string travelDate, string preferences)
+        public async Task<IActionResult> GetRecommendations(string country, string city, string travelDate, int culturalPercentage, int modernPercentage, int foodPercentage)
         {
-            var result = await _claudeService.GetTravelRecommendations(country, city, travelDate, preferences);
+            // ClaudeService'e dinamik olarak kullanıcıdan alınan yüzdeleri gönderiyoruz.
+            var result = await _claudeService.GetTravelRecommendations(country, city, travelDate, culturalPercentage, modernPercentage, foodPercentage);
 
+            // Sonuçları modele ekliyoruz
             var model = new TravelRequestModel
             {
                 Country = country,
                 City = city,
                 TravelDate = travelDate,
-                Preferences = preferences,
+                CulturalPercentage = culturalPercentage,
+                ModernPercentage = modernPercentage,
+                FoodPercentage = foodPercentage,
                 Recommendations = result.Split('\n').ToList()
             };
 
+            // Index view'ını modeliyle birlikte döndürüyoruz
             return View("Index", model);
         }
     }
