@@ -8,7 +8,7 @@ namespace RoamAI.Models
         public string City { get; set; }
         public string TravelDate { get; set; }
         public int CulturalPercentage { get; set; }
-        public int ModernPercentage { get; set; }
+        public int EntertainmantPercentage { get; set; }
         public int FoodPercentage { get; set; }
         public List<string> Recommendations { get; set; }
 

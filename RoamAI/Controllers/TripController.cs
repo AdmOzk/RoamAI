@@ -81,7 +81,7 @@ namespace RoamAI.Controllers
 
             };
 
-            foreach(Location in newTrip.Locations) { }
+            foreach(var Location in newTrip.Locations) { }
 
             _db.Add(newTrip);
             
@@ -130,27 +130,31 @@ namespace RoamAI.Controllers
 
 
 
-        [HttpPost]
-        public TravelRequestModel GetRecommendations(string country, string city, DateTime startDate, int culturalPercentage, int entertainmantPercentage, int foodPercentage)
+        public async Task<IActionResult> GetRecommendations(string country, string city, string travelDate, int culturalPercentage, int entertainmantPercentage, int foodPercentage)
         {
-            // ClaudeService'e dinamik olarak kullanıcıdan alınan yüzdeleri gönderiyoruz.
-            var result =  _claudeService.GetTravelRecommendations(country, city, startDate, culturalPercentage, entertainmantPercentage, foodPercentage);
+            // Seyahat önerilerini alıyoruz.
+            var travelRecommendations = await _claudeService.GetTravelRecommendations(country, city, travelDate, culturalPercentage, entertainmantPercentage, foodPercentage);
 
-            // Sonuçları modele ekliyoruz
+            // Şehir bilgilerini alıyoruz.
+            var cityInformation = await _claudeService.GetCityInformation(country, city);
+
+            // Sonuçları modele ekliyoruz.
             var model = new TravelRequestModel
             {
                 Country = country,
                 City = city,
-                StartDate = startDate,
-                
+                TravelDate = travelDate,
                 CulturalPercentage = culturalPercentage,
                 EntertainmantPercentage = entertainmantPercentage,
                 FoodPercentage = foodPercentage,
-                Recommendations = result.Split(new[] { Environment.NewLine },StringSplitOptions.None).ToList()
+                Recommendations = travelRecommendations.Split('\n').ToList(),
+                CityInformation = cityInformation // Şehir bilgisini modele ekledik.
             };
 
-            // Index view'ını modeliyle birlikte döndürüyoruz
-            return  model;
+            // Index view'ını modeliyle birlikte döndürüyoruz.
+            return View("Index", model);
         }
+
     }
 }
+
