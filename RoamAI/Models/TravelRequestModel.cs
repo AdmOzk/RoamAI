@@ -11,6 +11,8 @@ namespace RoamAI.Models
         public int ModernPercentage { get; set; }
         public int FoodPercentage { get; set; }
         public List<string> Recommendations { get; set; }
+
+        public string CityInformation { get; set; } // Yeni eklenen şehir bilgisi alanı
     }
 
 }

@@ -33,7 +33,7 @@ namespace RoamAI.Services
 
         public async Task<string> GetTravelRecommendations(string country, string city, string travelDate, int culturalPercentage, int modernPercentage, int foodPercentage)
         {
-            // Yüzdelik değerleri dinamik olarak yerleştiriyoruz
+            // Prompt
             var systemPrompt = $"Ülke-şehir-gideceği tarih: {country}-{city}-{travelDate}, gezi türü yüzdesi: %Kültürel: {culturalPercentage}, %Modern: {modernPercentage}, %Yemek: {foodPercentage}. " +
             "Belirtilen yüzdelere göre gezilecek toplamda tam 5 yer ve konumlarını şu formatta öner: \n" +
             $"- Kültürel (%{culturalPercentage}):\n1. Yer İsmi (Koordinatlar: xx.xxxx°N, xx.xxxx°E)\n2. Yer İsmi (Koordinatlar: xx.xxxx°N, xx.xxxx°E)\n" +
@@ -53,9 +53,9 @@ namespace RoamAI.Services
             }
         },
                 max_tokens = 10000,
-                temperature = 1,
-                top_p = 0.999,
-                top_k = 250,
+                temperature = 0.4,
+                top_p = 0.8,
+                top_k = 80,
                 stop_sequences = new string[] { },
                 anthropic_version = "bedrock-2023-05-31"
             };
@@ -128,5 +128,65 @@ namespace RoamAI.Services
                 return "No content found";
             }
         }
+
+        public async Task<string> GetCityInformation(string country, string city)
+        {
+            // Claude için şehir bilgisi istemek üzere bir prompt oluşturuyoruz.
+            var systemPrompt = $"Ülke: {country}, Şehir: {city}. Bu şehir hakkında detaylı bir paragraf bilgi ver.";
+
+            var input = new
+            {
+                system = systemPrompt,
+                messages = new[]
+                {
+            new
+            {
+                role = "user",
+                content = $"Şehir: {city} hakkında bilgi ver"
+            }
+        },
+                max_tokens = 1000,
+                temperature = 0.5,
+                top_p = 0.8,
+                top_k = 80,
+                stop_sequences = new string[] { },
+                anthropic_version = "bedrock-2023-05-31"
+            };
+
+            var inputJson = JsonSerializer.Serialize(input);
+
+            var request = new InvokeModelRequest
+            {
+                ModelId = "anthropic.claude-3-sonnet-20240229-v1:0",
+                ContentType = "application/json",
+                Body = new MemoryStream(Encoding.UTF8.GetBytes(inputJson))
+            };
+
+            var response = await _runtimeClient.InvokeModelAsync(request);
+
+            using (var reader = new StreamReader(response.Body))
+            {
+                var responseBody = await reader.ReadToEndAsync();
+
+                var jsonDocument = JsonDocument.Parse(responseBody);
+                var root = jsonDocument.RootElement;
+
+                // Claude yanıtından şehir bilgisi paragrafını alıyoruz.
+                if (root.TryGetProperty("content", out var contentArray) && contentArray.ValueKind == JsonValueKind.Array)
+                {
+                    foreach (var content in contentArray.EnumerateArray())
+                    {
+                        if (content.TryGetProperty("text", out var textElement) && textElement.ValueKind == JsonValueKind.String)
+                        {
+                            var cityInformation = textElement.GetString();
+                            return cityInformation;
+                        }
+                    }
+                }
+
+                return "Şehir hakkında bilgi bulunamadı.";
+            }
+        }
+
     }
 }

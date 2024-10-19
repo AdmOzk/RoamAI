@@ -22,25 +22,30 @@ namespace RoamAI.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> GetRecommendations(string country, string city, string travelDate, int culturalPercentage, int modernPercentage, int foodPercentage)
-        {
-            // ClaudeService'e dinamik olarak kullanıcıdan alınan yüzdeleri gönderiyoruz.
-            var result = await _claudeService.GetTravelRecommendations(country, city, travelDate, culturalPercentage, modernPercentage, foodPercentage);
+public async Task<IActionResult> GetRecommendations(string country, string city, string travelDate, int culturalPercentage, int modernPercentage, int foodPercentage)
+{
+    // Seyahat önerilerini alıyoruz.
+    var travelRecommendations = await _claudeService.GetTravelRecommendations(country, city, travelDate, culturalPercentage, modernPercentage, foodPercentage);
 
-            // Sonuçları modele ekliyoruz
-            var model = new TravelRequestModel
-            {
-                Country = country,
-                City = city,
-                TravelDate = travelDate,
-                CulturalPercentage = culturalPercentage,
-                ModernPercentage = modernPercentage,
-                FoodPercentage = foodPercentage,
-                Recommendations = result.Split('\n').ToList()
-            };
+    // Şehir bilgilerini alıyoruz.
+    var cityInformation = await _claudeService.GetCityInformation(country, city);
 
-            // Index view'ını modeliyle birlikte döndürüyoruz
-            return View("Index", model);
-        }
+    // Sonuçları modele ekliyoruz.
+    var model = new TravelRequestModel
+    {
+        Country = country,
+        City = city,
+        TravelDate = travelDate,
+        CulturalPercentage = culturalPercentage,
+        ModernPercentage = modernPercentage,
+        FoodPercentage = foodPercentage,
+        Recommendations = travelRecommendations.Split('\n').ToList(),
+        CityInformation = cityInformation // Şehir bilgisini modele ekledik.
+    };
+
+    // Index view'ını modeliyle birlikte döndürüyoruz.
+    return View("Index", model);
+}
+
     }
 }
