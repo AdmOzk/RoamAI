@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using RoamAI.Models.Entities;
 
 namespace RoamAI.Context
 {
@@ -9,5 +10,11 @@ namespace RoamAI.Context
             : base(options)
         {
         }
+
+        public DbSet<Trip> Trips { get; set; }
+
+        public DbSet<Location> Locations { get; set; }
+
+        public DbSet<UserTrip> UserTrips { get; set; }
     }
 }
