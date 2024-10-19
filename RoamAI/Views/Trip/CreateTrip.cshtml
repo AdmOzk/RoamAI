@@ -16,7 +16,11 @@
         <br />
 
         <label>Gideceğiniz Tarih: </label>
-        <input type="date" name="TravelDate" required />
+        <input type="date" name="StartDate" required />
+        <br />
+
+        <label>Döneceğiniz Tarih: </label>
+        <input type="date" name="EndDate" required />
         <br />
 
         <label>Kültürel Gezi Yüzdesi: </label>
@@ -24,7 +28,7 @@
         <br />
 
         <label>Modern Gezi Yüzdesi: </label>
-        <input type="number" name="ModernPercentage" required min="0" max="100" value="30" />
+        <input type="number" name="EntertainmantPercentage" required min="0" max="100" value="30" />
         <br />
 
         <label>Yemek Üzerine Gezi Yüzdesi: </label>
@@ -110,7 +114,7 @@
         // Yüzde kontrolü: Toplam %100 olmalı
         $('#submitBtn').click(function (e) {
             var cultural = parseInt($('input[name="CulturalPercentage"]').val(), 10) || 0;
-            var modern = parseInt($('input[name="ModernPercentage"]').val(), 10) || 0;
+            var modern = parseInt($('input[name="EntertainmantPercentage"]').val(), 10) || 0;
             var food = parseInt($('input[name="FoodPercentage"]').val(), 10) || 0;
             var total = cultural + modern + food;
 

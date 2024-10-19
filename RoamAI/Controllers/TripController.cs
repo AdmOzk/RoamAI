@@ -139,10 +139,10 @@ namespace RoamAI.Controllers
 
 
 
-        public async Task<IActionResult> GetRecommendations(string country, string city, string travelDate, int culturalPercentage, int entertainmantPercentage, int foodPercentage)
+        public async Task<IActionResult> GetRecommendations(string country, string city, string StartDate,string EndDate, int culturalPercentage, int entertainmantPercentage, int foodPercentage)
         {
             // Seyahat önerilerini alıyoruz.
-            var travelRecommendations = await _claudeService.GetTravelRecommendations(country, city, travelDate, culturalPercentage, entertainmantPercentage, foodPercentage);
+            var travelRecommendations = await _claudeService.GetTravelRecommendations(country, city, StartDate, EndDate , culturalPercentage, entertainmantPercentage, foodPercentage);
 
             // Şehir bilgilerini alıyoruz.
             var cityInformation = await _claudeService.GetCityInformation(country, city);
@@ -152,7 +152,8 @@ namespace RoamAI.Controllers
             {
                 Country = country,
                 City = city,
-                TravelDate = travelDate,
+                StartDate = StartDate,
+                EndDate = EndDate,
                 CulturalPercentage = culturalPercentage,
                 EntertainmantPercentage = entertainmantPercentage,
                 FoodPercentage = foodPercentage,
