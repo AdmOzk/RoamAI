@@ -16,17 +16,15 @@ namespace RoamAI.Controllers
         private readonly ApplicationDbContext  _db;
         private readonly ClaudeService _claudeService;
 
-        public TripController(ApplicationDbContext db)
+        public TripController(ApplicationDbContext db, ClaudeService claudeService)
         {
             _db = db;
-
-
-        }
-
-        public TripController(ClaudeService claudeService)
-        {
             _claudeService = claudeService;
+
+
         }
+
+
 
         // GET: TripController
         public ActionResult Index()
@@ -46,6 +44,17 @@ namespace RoamAI.Controllers
         }
 
 
+        public ActionResult CurrentTrip(int userId)
+        {
+            var trip = _db.Trips.Where(x => x.Id == userId && x.IsDone == false);
+
+
+            return View(trip);
+        }
+
+
+
+
 
         // GET: TripController/Details/5
         public ActionResult Details(int id)
@@ -54,7 +63,7 @@ namespace RoamAI.Controllers
         }
 
         // GET: TripController/Create
-        public ActionResult Create()
+        public ActionResult CreateTrip()
         {
             return View();
         }
@@ -62,7 +71,7 @@ namespace RoamAI.Controllers
         // POST: TripController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(Trip trip)
+        public ActionResult CreateTrip(Trip trip)
         {
             //users!!
 
@@ -152,7 +161,7 @@ namespace RoamAI.Controllers
             };
 
             // Index view'ını modeliyle birlikte döndürüyoruz.
-            return View("Index", model);
+            return View("CreateTrip", model);
         }
 
     }
