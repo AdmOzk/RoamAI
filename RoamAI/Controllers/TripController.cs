@@ -7,6 +7,7 @@ using RoamAI.Models.Entities;
 using RoamAI.Services;
 using System.Collections;
 using System.Security.Cryptography;
+using System.Text.Json;
 
 namespace RoamAI.Controllers
 {
@@ -146,6 +147,11 @@ namespace RoamAI.Controllers
 
             // Şehir bilgilerini alıyoruz.
             var cityInformation = await _claudeService.GetCityInformation(country, city);
+
+            var locationCoordinatesJson = System.Text.Json.JsonSerializer.Serialize(ClaudeService.locationCoordinates);
+
+            // ViewBag'e JSON olarak ekliyoruz
+            ViewBag.LocationCoordinates = locationCoordinatesJson;
 
             // Sonuçları modele ekliyoruz.
             var model = new TravelRequestModel

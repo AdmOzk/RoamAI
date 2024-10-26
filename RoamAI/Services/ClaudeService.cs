@@ -13,7 +13,7 @@ namespace RoamAI.Services
     {
         private readonly AmazonBedrockRuntimeClient _runtimeClient;
 
-        private static Dictionary<string, string> locationCoordinates = new Dictionary<string, string>();
+        public static Dictionary<string, string> locationCoordinates = new Dictionary<string, string>();
 
         public ClaudeService(IConfiguration configuration)
         {
@@ -42,12 +42,9 @@ namespace RoamAI.Services
     $"- Kültürel (%{culturalPercentage}): Kültürel yer önerilerini günün toplam öneri sayısının %{culturalPercentage} kadarı olacak şekilde yap.\n" +
     $"- Modern (%{EntertainmantPercentage}): Eğlence yer önerilerini günün toplam öneri sayısının %{EntertainmantPercentage} kadarı olacak şekilde yap.\n" +
     $"- Yemek (%{foodPercentage}): Yemek yer önerilerini günün toplam öneri sayısının %{foodPercentage} kadarı olacak şekilde yap.\n" +
-    "2. Gün (Tarih: {StartDate.AddDays(1)}):\n" +
-    $"- Kültürel (%{culturalPercentage}): Kültürel yer önerilerini günün toplam öneri sayısının %{culturalPercentage} kadarı olacak şekilde yap.\n" +
-    $"- Modern (%{EntertainmantPercentage}): Eğlence yer önerilerini günün toplam öneri sayısının %{EntertainmantPercentage} kadarı olacak şekilde yap.\n" +
-    $"- Yemek (%{foodPercentage}): Yemek yer önerilerini günün toplam öneri sayısının %{foodPercentage} kadarı olacak şekilde yap.\n" +
     "Her gün için öneri yaparken, her kategoride benzersiz yerler öner ve aynı yeri başka bir günde tekrar etme. Her öneri, belirtilen formatta ('Yer İsmi (Koordinatlar: xx.xxxx°N, xx.xxxx°E)') olmalıdır. " +
-    "Belirtilen tarihlerde eğer milli bir bayram varsa belirt, yoksa şu mesajı ver: 'Not: {StartDate} - {EndDate} tarihleri arası, {country} bölgesinde herhangi bir milli bayrama denk gelmiyor.' Yanıtın her zaman bu formatta olmalı.";
+   "Günleri kalacağı gün kadar devam ettir. Günlerin tamamını detaylı olarak listele, kısaltma ya da '...' ifadesi kullanma. Kullanıcının belirttiği gün sayısı kadar günü ayrı ayrı detaylandır." +
+    "Belirtilen tarih aralığında ki tüm günleri tek tek kontrol et belirtilen ülkede herhangi resmi tatil günü varsa döndür. Mesela : verdiğin liste de ki günler 28 ekim , 29 ekim 30 ekim burada 29 ekim türkiyede resmi tatildir ona göre 29 ekim var dikkatli olunuz gibi mesaj döndürmen lazım Yoksa en sonda ayrı bir yerde şu mesajı ver: 'Gideceğiniz tarih herhangi bir milli bayrama denk gelmiyor.' Yanıtın her zaman bu formatta olmalı.";
 
             var input = new
             {
@@ -61,9 +58,9 @@ namespace RoamAI.Services
             }
         },
                 max_tokens = 10000,
-                temperature = 0.4,
-                top_p = 0.8,
-                top_k = 80,
+                temperature = 0.1,
+                top_p = 0.95,
+                top_k = 5,
                 stop_sequences = new string[] { },
                 anthropic_version = "bedrock-2023-05-31"
             };
