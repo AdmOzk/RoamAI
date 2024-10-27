@@ -13,7 +13,7 @@ namespace RoamAI.Models.Entities
 
         public string? Coordinates { get; set; }
 
-        public int tripId { get; set; }
+        public int? tripId { get; set; }
 
         public Trip? Trip { get; set; }
 

@@ -2,6 +2,7 @@
 using Amazon.BedrockRuntime.Model;
 using Amazon.Runtime;
 using Microsoft.Extensions.Configuration;
+using RoamAI.Models;
 using System.IO;
 using System.Text;
 using System.Text.Json;
@@ -31,8 +32,10 @@ namespace RoamAI.Services
             _runtimeClient = new AmazonBedrockRuntimeClient(credentials, config);
         }
 
-        public async Task<string> GetTravelRecommendations(string country, string city, string StartDate,string EndDate, int culturalPercentage, int EntertainmantPercentage, int foodPercentage)
+        public async Task<ClaudeResponseModel> GetTravelRecommendations(string country, string city, DateTime StartDate,DateTime EndDate, int culturalPercentage, int EntertainmantPercentage, int foodPercentage)
         {
+
+            ClaudeResponseModel cresponse = new ClaudeResponseModel();
             // Prompt
            var systemPrompt = $"Ülke-şehir-gideceği tarih: {country}-{city}-{StartDate}-{EndDate}, gezi türü yüzdesi: %Kültürel: {culturalPercentage}, %Eğlence: {EntertainmantPercentage}, %Yemek: {foodPercentage}. " +
     "Her gün için önerilecek toplam yer sayısını sen belirle ve bu sayıyı yüzdelere göre kültürel, eğlence ve yemek kategorilerine böl. Önerdiğin yer sayısı her kategori için yüzdeye uygun olmalı. " +
@@ -125,20 +128,28 @@ namespace RoamAI.Services
                                 }
                             }
 
-                            // Diziyi yazdır
-                            Console.WriteLine("Önerilen Seyahat Yerleri:");
+                            Dictionary<string, string> LocationsAndCoordinates = new Dictionary<string, string>();
+                            
+                            
+                            
                             foreach (var entry in locationCoordinates)
                             {
-                                Console.WriteLine($"{entry.Key} {entry.Value}");
+                                LocationsAndCoordinates.Add(entry.Key, entry.Value);    
                             }
 
-                            // Tüm yanıtı döndür (text alanını olduğu gibi döndür)
-                            return fullText;
+
+
+                            cresponse.LocationCoordinates = LocationsAndCoordinates;
+                            cresponse.text = fullText;
+                            
+                            return cresponse;
                         }
                     }
                 }
 
-                return "No content found";
+                return cresponse;
+
+                
             }
         }
 

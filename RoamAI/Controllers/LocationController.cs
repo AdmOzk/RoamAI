@@ -30,7 +30,7 @@ namespace RoamAI.Controllers
 
         }
 
-        public IList<Location> getLocationsBytripId(int tripId)
+        public List<Location> getLocationsBytripId(int tripId)
         {
             var locationList = _db.Locations.Where(x => x.tripId == tripId).ToList();
 

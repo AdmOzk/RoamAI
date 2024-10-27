@@ -40,19 +40,11 @@ namespace RoamAI.Controllers
             return View();
         }
 
-        public ActionResult myTrips(string userId)
-        {
-            var trips = getTripsByUserId(userId);
-
-
-            return View(trips);
-        }
-
-
         public ActionResult CurrentTrip()
         {
-            var userId = _userManager.GetUserAsync(User).Result.Id;
-            var trip = _db.Trips.Where(x => x.IdentityUserId == userId && x.IsDone == false);
+            var user = _userManager.GetUserAsync(User);
+            var userId = user.Result.Id;
+            var trip = _db.Trips.FirstOrDefault(x => x.IdentityUserId == userId && x.IsDone == false);
 
 
             return View(trip);
@@ -61,15 +53,17 @@ namespace RoamAI.Controllers
 
         public ActionResult TripDetail(int tripId)
         {
-            var trip = _db.Trips.Where(x => x.Id == tripId && x.IsDone == true);
+            var trip = _db.Trips.Where(x => x.Id == tripId && x.IsDone == true).ToList();
 
 
             return View(trip);
         }
 
-        public ActionResult MyTrips(string userid)
+        public ActionResult MyTrips()
         {
-            var trip = getTripsByUserId(userid);
+            var user = _userManager.GetUserAsync(User);
+            var userId = user.Result.Id;
+            var trip = getTripsByUserId(userId);
 
 
             return View(trip);
@@ -95,30 +89,42 @@ namespace RoamAI.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult CreateTrip(Trip trip)
         {
+
+            foreach(var loc in trip.Locations)
+            {
+                loc.Trip = trip;
+
+                _db.Locations.Add(loc);
+            }
+            var user = _userManager.GetUserAsync(User);
+            _db.SaveChanges();
             
 
             var newTrip = new Trip()
             {
                 EntertainmantPercentage = trip.EntertainmantPercentage,
                 FoodPercentage = trip.FoodPercentage,
-                CulturalPercentage=trip.CulturalPercentage, 
+                CulturalPercentage = trip.CulturalPercentage, 
                 DayCountToStay = trip.DayCountToStay,
                 StartDate = trip.StartDate,
                 EndDate = trip.EndDate,
+                Country = trip.Country,
+                City = trip.City,
                 Score = trip.Score,
                 IsDone = false,
                 Locations = trip.Locations, 
                 Description = trip.Description,
-                IdentityUser =  _userManager.GetUserAsync(User).Result
+                IdentityUser = user.Result,
+                IdentityUserId = user.Result.Id
+
 
             };
 
-
-            _db.Add(newTrip);
+            _db.Trips.Add(newTrip);
             
             _db.SaveChanges();
 
-            return RedirectToAction("Index");//todo
+            return RedirectToAction("CurrentTrip");//todo
             
         }
 
@@ -158,13 +164,13 @@ namespace RoamAI.Controllers
 
 
 
-        public async Task<IActionResult> GetRecommendations(string country, string city, string StartDate,string EndDate, int culturalPercentage, int entertainmantPercentage, int foodPercentage)
+        public void GetRecommendations(string country, string city, DateTime StartDate,DateTime EndDate, int culturalPercentage, int entertainmantPercentage, int foodPercentage)
         {
             // Seyahat önerilerini alıyoruz.
-            var travelRecommendations = await _claudeService.GetTravelRecommendations(country, city, StartDate, EndDate , culturalPercentage, entertainmantPercentage, foodPercentage);
+            var travelRecommendations =  _claudeService.GetTravelRecommendations(country, city, StartDate, EndDate , culturalPercentage, entertainmantPercentage, foodPercentage).Result.text;
 
             // Şehir bilgilerini alıyoruz.
-            var cityInformation = await _claudeService.GetCityInformation(country, city);
+            var cityInformation =  _claudeService.GetCityInformation(country, city).Result;
 
             var locationCoordinatesJson = System.Text.Json.JsonSerializer.Serialize(ClaudeService.locationCoordinates);
 
@@ -172,21 +178,55 @@ namespace RoamAI.Controllers
             ViewBag.LocationCoordinates = locationCoordinatesJson;
 
             // Sonuçları modele ekliyoruz.
-            var model = new TravelRequestModel
+            //var model = new TravelRequestModel
+            //{
+            //    Country = country,
+            //    City = city,
+            //    StartDate = StartDate,
+            //    EndDate = EndDate,
+            //    CulturalPercentage = culturalPercentage,
+            //    EntertainmantPercentage = entertainmantPercentage,
+            //    FoodPercentage = foodPercentage,
+            //    Recommendations = travelRecommendations.Split('\n').ToList(),
+            //    CityInformation = cityInformation // Şehir bilgisini modele ekledik.
+            //};
+
+            List<Location> locations = new List<Location>();
+            var tempDict = _claudeService.GetTravelRecommendations(country, city, StartDate, EndDate, culturalPercentage, entertainmantPercentage, foodPercentage).Result.LocationCoordinates;
+            //dictionary -> ICollection
+
+            foreach (var location in tempDict) {
+
+                var loc = new Location()
+                {
+                    LocationName = location.Key,
+                    Coordinates = location.Value,
+                };
+
+                locations.Add(loc);
+            
+            
+            }
+
+            tempDict.Clear();
+            var tripModel = new Trip()
             {
                 Country = country,
                 City = city,
                 StartDate = StartDate,
                 EndDate = EndDate,
+                DayCountToStay = (EndDate - StartDate).Days,
                 CulturalPercentage = culturalPercentage,
                 EntertainmantPercentage = entertainmantPercentage,
                 FoodPercentage = foodPercentage,
-                Recommendations = travelRecommendations.Split('\n').ToList(),
-                CityInformation = cityInformation // Şehir bilgisini modele ekledik.
+                Description = cityInformation,
+                Locations = locations,
+                
+
             };
 
-            // Index view'ını modeliyle birlikte döndürüyoruz.
-            return View("CreateTrip", model);
+
+            CreateTrip(tripModel);
         }
 
     }

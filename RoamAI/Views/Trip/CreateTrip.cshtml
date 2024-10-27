@@ -1,55 +1,56 @@
-﻿@model TravelRequestModel
+﻿@using RoamAI.Models.Entities
+@model Trip
 
 <div>
     <h2>Travel Planı Oluştur</h2>
     <form method="post" asp-action="GetRecommendations" asp-controller="Trip">
         <label>Ülke: </label>
-        <select id="country" name="Country" class="choices" required>
+        <select id="country" name="Country" asp-for="Country" class="choices" required>
             <option value="">Select Country</option>
         </select>
         <br />
 
         <label>Şehir: </label>
-        <select id="city" name="City" required>
+        <select id="city" name="City" asp-for="City" required>
             <option value="">Select City</option>
         </select>
         <br />
 
         <label>Gideceğiniz Tarih: </label>
-        <input type="date" name="StartDate" required />
+        <input type="date" name="StartDate" asp-for="StartDate" required />
         <br />
 
         <label>Döneceğiniz Tarih: </label>
-        <input type="date" name="EndDate" required />
+        <input type="date" name="EndDate" asp-for="EndDate" required />
         <br />
 
         <label>Kültürel Gezi Yüzdesi: </label>
-        <input type="number" name="CulturalPercentage" required min="0" max="100" value="40" />
+        <input type="number" name="CulturalPercentage" asp-for="CulturalPercentage" required min="0" max="100" value="40" />
         <br />
 
         <label>Modern Gezi Yüzdesi: </label>
-        <input type="number" name="EntertainmantPercentage" required min="0" max="100" value="30" />
+        <input type="number" name="EntertainmantPercentage" asp-for="EntertainmantPercentage" required min="0" max="100" value="30" />
         <br />
 
         <label>Yemek Üzerine Gezi Yüzdesi: </label>
-        <input type="number" name="FoodPercentage" required min="0" max="100" value="30" />
+        <input type="number" name="FoodPercentage" asp-for="FoodPercentage" required min="0" max="100" value="30" />
         <br />
 
         <button type="submit" id="submitBtn">Plan Oluştur</button>
     </form>
 
-    @if (Model != null && Model.Recommendations != null && Model.Recommendations.Any())
+    @if (Model != null && Model.Locations != null && Model.Locations.Any())
     {
         <h3>Gezilecek Yerler</h3>
         <ul>
-            @foreach (var recommendation in Model.Recommendations)
+            @foreach (var recommendation in Model.Locations)
             {
-                <li>@recommendation</li>
+                <li>@recommendation.LocationName</li>
             }
         </ul>
 
         <h3>@Model.City hakkında Bilgiler</h3>
-        <p>@Model.CityInformation</p> <!-- Şehir hakkında bilgiyi burada gösteriyoruz. -->
+        <p>@Model.Description</p> <!-- Şehir hakkında bilgiyi burada gösteriyoruz. -->
 
 
         <h3>Harita</h3>

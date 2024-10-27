@@ -32,13 +32,13 @@ namespace RoamAI.Models.Entities
 
         public string? City { get; set; }
 
-        public string IdentityUserId { get; set; }
+        public string? IdentityUserId { get; set; }
 
         
         [ForeignKey("IdentityUserId")]
-        public virtual IdentityUser IdentityUser { get; set; }
+        public virtual IdentityUser? IdentityUser { get; set; }
 
-        public ICollection<Location>? Locations { get; set; }
+        public List<Location>? Locations { get; set; }
 
 
 
