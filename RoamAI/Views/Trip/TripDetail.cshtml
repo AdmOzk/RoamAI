@@ -4,8 +4,6 @@
 <div class="container">
 
 
-@if (Model != null){
-    
         <div class="row mt-3">
 
             <p class="h1 ms-3 mb-3 border-bottom border-success">@Model.Country -  @Model.City</p>
@@ -21,7 +19,7 @@
                     <li class="mt-2"><b>Kalınacak Gün Sayısı:</b> @Model.DayCountToStay</li>
                     <li class="mt-2"><b>Gezi İçeriği:</b>%@Model.CulturalPercentage Kültürel, %@Model.EntertainmantPercentage Eğlence, %@Model.FoodPercentage Gastrolojik</li>
                     <li class="mt-2"><b>Şehir Açıklaması:</b> @Model.Description</li>
-                    
+
 
                 </ul>
 
@@ -36,7 +34,7 @@
 
                             <p>@Location.Coordinates</p>
 
-                            
+
 
 
                         </div>
@@ -44,16 +42,11 @@
                     }
                 </div>
 
-                <li class="mt-2 border-bottom pb-3"><a class="btn btn-sm btn-danger" asp-controller="Trip" asp-action="changeDoneTripStatus" asp-route-id="@Model.Id">Seyahati Bitir</a></li>
+                
 
             </div>
 
-            </div>
-}
-
-else{
-    <p>güncel seyahatiniz bulunamadı </p>
-    <a class="nav-link text-dark" asp-area="" asp-controller="Trip" asp-action="CreateTrip">Seyahat Oluştur</a>
-}
+        </div>
+    }
 
 </div>

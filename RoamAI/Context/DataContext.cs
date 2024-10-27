@@ -15,6 +15,6 @@ namespace RoamAI.Context
 
         public DbSet<Location> Locations { get; set; }
 
-        public DbSet<UserTrip> UserTrips { get; set; }
+        
     }
 }

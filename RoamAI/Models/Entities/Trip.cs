@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RoamAI.Models.Entities
 {
@@ -20,15 +22,23 @@ namespace RoamAI.Models.Entities
 
         public DateTime EndDate { get; set; }
 
-        public int Score { get; set; }
+        public int? Score { get; set; }
 
         public bool IsDone { get; set; }
 
         public string? Description { get; set; }
 
-        public ICollection<Location>? Locations { get; set; }
+        public string? Country { get; set; }
 
-        public ICollection<UserTrip>? UserTrips { get; set; }
+        public string? City { get; set; }
+
+        public string IdentityUserId { get; set; }
+
+        
+        [ForeignKey("IdentityUserId")]
+        public virtual IdentityUser IdentityUser { get; set; }
+
+        public ICollection<Location>? Locations { get; set; }
 
 
 

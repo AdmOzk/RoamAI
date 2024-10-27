@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RoamAI.Context;
@@ -6,6 +7,7 @@ using RoamAI.Models;
 using RoamAI.Models.Entities;
 using RoamAI.Services;
 using System.Collections;
+using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text.Json;
 
@@ -16,11 +18,13 @@ namespace RoamAI.Controllers
 
         private readonly ApplicationDbContext  _db;
         private readonly ClaudeService _claudeService;
+        private readonly UserManager<IdentityUser> _userManager;
 
-        public TripController(ApplicationDbContext db, ClaudeService claudeService)
+        public TripController(ApplicationDbContext db, ClaudeService claudeService, UserManager<IdentityUser> userManager)
         {
             _db = db;
             _claudeService = claudeService;
+            _userManager = userManager;
 
 
         }
@@ -45,14 +49,31 @@ namespace RoamAI.Controllers
         }
 
 
-        public ActionResult CurrentTrip(int userId)
+        public ActionResult CurrentTrip()
         {
-            var trip = _db.Trips.Where(x => x.Id == userId && x.IsDone == false);
+            var userId = _userManager.GetUserAsync(User).Result.Id;
+            var trip = _db.Trips.Where(x => x.IdentityUserId == userId && x.IsDone == false);
 
 
             return View(trip);
         }
 
+
+        public ActionResult TripDetail(int tripId)
+        {
+            var trip = _db.Trips.Where(x => x.Id == tripId && x.IsDone == true);
+
+
+            return View(trip);
+        }
+
+        public ActionResult MyTrips(string userid)
+        {
+            var trip = getTripsByUserId(userid);
+
+
+            return View(trip);
+        }
 
 
 
@@ -74,7 +95,7 @@ namespace RoamAI.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult CreateTrip(Trip trip)
         {
-            //users!!
+            
 
             var newTrip = new Trip()
             {
@@ -88,10 +109,10 @@ namespace RoamAI.Controllers
                 IsDone = false,
                 Locations = trip.Locations, 
                 Description = trip.Description,
+                IdentityUser =  _userManager.GetUserAsync(User).Result
 
             };
 
-            foreach(var Location in newTrip.Locations) { }
 
             _db.Add(newTrip);
             
@@ -123,17 +144,14 @@ namespace RoamAI.Controllers
                 _db.SaveChanges();
             }
 
-            return RedirectToAction("Index");
+            return RedirectToAction("MyTrips");
         }
         
 
 
-        public IList<Trip> getTripsByUserId(string id)
+        public List<Trip> getTripsByUserId(string id)
         {
-            var trips =  _db.UserTrips
-           .Where(x => x.User.Id == id)
-           .Select(x => x.Trip)
-           .ToList();
+            var trips =  _db.Trips.Where(x=> x.IdentityUserId == id).ToList();   
 
             return trips;
         }

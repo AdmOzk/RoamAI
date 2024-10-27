@@ -1,13 +1,41 @@
 ﻿@using RoamAI.Models.Entities
 @model List<Trip>
 
-<h1>My Trips</h1>
+<div class="card mb-4 mt-2">
 
-@foreach(var list in Model)
-{
-    <p>@list.StartDate</p>
-    //gerekli proplar + details
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered" width="100%" cellspacing="0" >
+                <thead>
+                    <tr>
+                        <th>Ülke</th>
+                        <th>Şehir</th>
+                        <th>Gidiş Tarihi</th>
+                        <th>Dönüş Tarihi</th>
+                        
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var trip in Model)
+                    {
+                        <tr>
+                            <td>@trip.Country</td>
+                            <td>@trip.City</td>
+                            <td>@trip.StartDate</td>
+                            <td>@trip.EndDate</td>
+                            
 
-    
+                            <td>
 
-}
+                                <a class="btn btn-sm btn-warning" asp-controller="Trip" asp-action="TripDetail" asp-route-id="@trip.Id">Detay</a>
+                                <a class="btn btn-sm btn-danger" asp-controller="Trip" asp-action="Delete" asp-route-id="@trip.Id" onclick="return confirm('Bu kaydı silmek istediğinize emin misiniz?')">Sil</a>
+
+                            </td>
+
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
