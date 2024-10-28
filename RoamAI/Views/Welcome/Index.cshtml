@@ -1,26 +1,576 @@
 ﻿@{
-    ViewData["Title"] = "Hello Page";
-    Layout = null;
+    ViewData["Title"] = "RoamAI";
 }
 
-<div class="container">
-    <main role="main" class="pb-3">
-        <h1>@ViewData["Title"]</h1>
-        <p>Hello</p>
-        <a class="text-dark border border-4 " id="register" asp-area="Identity" asp-page="/Account/Register">Register</a>
-        <a class="text-dark border border-4 " id="login" asp-area="Identity" asp-page="/Account/Login">Login</a>
-        
-    </main>
+<div class="hero-section text-white text-center d-flex align-items-center justify-content-center" style="height: 100vh; background-image: url('/images/travel1.png'); background-size: cover; background-position: center; position: relative;">
+    <div class="overlay"></div>
+    <div class="hero-content">
+        <h1 class="display-4">RoamAI</h1>
+        <p class="lead">Yapay Zeka Destekli Seyahat Önerileri ile Keşfet</p>
+        <a href="#about-div" class="btn btn-light btn-lg mt-3">Explore</a>
+    </div>
+    <div class="scroll-down-indicator">
+        <a href="#about-div"><img src="/images/scroll.png" alt="Scroll Down"></a>
+    </div>
 </div>
 
-<footer class="border-top footer text-muted">
-    <div class="container">
-        &copy; 2024 - RoamAI - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+<div id="about-div" style="background-image: url('/images/travel1.png'); padding: 70px;">
+    <section id="about" class="container py-5">
+        <div class="row">
+            <div class="col-md-12 text-center">
+                <h2 class="mb-4">RoamAI ile Seyahatin Geleceği</h2>
+                <p>
+                    Seyahatinizi planlamak artık hiç olmadığı kadar kolay ve heyecan verici. RoamAI, gezginlerin ilham almasına, yeni yerler keşfetmesine ve seyahatlerini kişiselleştirilmiş önerilerle optimize etmesine olanak tanıyan yenilikçi bir yapay zeka platformudur.
+                    Her gezginin bir hikayesi olduğuna inanıyor ve bu hikayeyi en iyi şekilde oluşturmanıza yardımcı oluyoruz. Algoritmalarımız, dünya çapında yüzlerce destinasyonu tarayarak, size en uygun seyahat rotalarını ve maceraları sunar.
+                </p>
+                <p>
+                    Sadece destinasyon önerileri değil, aynı zamanda yerel kültür, gizli mekanlar ve seyahat ipuçları ile seyahatinizi daha anlamlı hale getiriyoruz. Seyahat deneyiminizi üst düzeye çıkarmak için RoamAI'yi kullanarak yeni bir dünya keşfedin.
+                </p>
+                <p>
+                    RoamAI, sıkıcı seyahat planlama süreçlerini ortadan kaldırır ve seyahatlerinizi basit bir adımda keyifli hale getirir. Yapay zekanın gücüyle seyahatinizin her anını unutulmaz kılın.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section id="how-to-use" class="container py-5">
+        <div class="row">
+            <div class="col-md-12 text-center">
+                <h2 class="mb-4">Nasıl Kullanılır</h2>
+                <p>
+                    RoamAI'yi kullanmaya başlamak için hızlıca bir hesap oluşturabilir ve seyahat tercihlerinizi belirleyerek öneriler alabilirsiniz.
+                    Yapay zeka algoritmamız, size özel destinasyon önerileri ve seyahat planları sunacaktır.
+                </p>
+            </div>
+        </div>
+
+        <div class="row text-center mt-4">
+            <div class="col-md-4">
+                <div class="how-to-step p-4 border rounded">
+                    <h5>1. Hesap Oluştur</h5>
+                    <p>Hızlıca kayıt olun ve profilinizi oluşturun.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="how-to-step p-4 border rounded">
+                    <h5>2. Tercihlerinizi Belirleyin</h5>
+                    <p>Gezilecek yerler ve ilgi alanlarınızı seçin.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="how-to-step p-4 border rounded">
+                    <h5>3. Önerileri Keşfedin</h5>
+                    <p>Size özel seyahat önerileri ve rotalar alın.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="popular-destinations" class="container py-5">
+        <div class="text-center">
+            <h2 class="mb-4">Popüler Seyahat Noktaları</h2>
+        </div>
+        <div id="destinationCarousel" class="carousel slide" data-bs-ride="carousel" >
+            <div class="carousel-inner">
+                <!-- İlk 3 Destinasyon -->
+                <div class="carousel-item active">
+                    <div class="destinations-container d-flex justify-content-center gap-3 flex-wrap">
+                        <div class="destination-card text-center">
+                            <div class="image-city">
+                                <h5>İstanbul</h5>
+                                <img src="/images/ist1.png" alt="İstanbul" class="city-image" />
+                                
+                                <p>Tarihin ve modern yaşamın buluştuğu şehir.</p>
+                            </div>
+                        </div>
+                        <div class="destination-card text-center">
+                            <div class="image-city">
+                                <h5>Paris</h5>
+                                <img src="/images/paris.png" alt="Paris" class="city-image" />
+                                
+                                <p>Aşkın ve sanatın başkenti.</p>
+                            </div>
+                        </div>
+                        <div class="destination-card text-center">
+                            <div class="image-city">
+                                <h5>Tokyo</h5>
+                                <img src="/images/tokyo.png" alt="Tokyo" class="city-image" />
+                                
+                                <p>Gelenek ve teknolojinin baş döndüren karışımı.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- İkinci 3 Destinasyon -->
+                <div class="carousel-item">
+                    <div class="destinations-container d-flex justify-content-center gap-3 flex-wrap">
+                        <div class="destination-card text-center">
+                            <div class="image-city">
+                                <h5>Londra</h5>
+                                <img src="/images/london.png" alt="Londra" class="city-image" />
+                                
+                                <p>Tarihi yapılar ve modern kültür.</p>
+                            </div>
+                        </div>
+                        <div class="destination-card text-center">
+                            <div class="image-city">
+                                <h5>Roma</h5>
+                                <img src="/images/roma.png" alt="Roma" class="city-image" />
+                                
+                                <p>Tarihin merkezi, antik şehir.</p>
+                            </div>
+                        </div>
+                        <div class="destination-card text-center">
+                            <div class="image-city">
+                                <h5>New York</h5>
+                                <img src="/images/newyork.png" alt="New York" class="city-image" />
+                                
+                                <p>Şehir hayatının merkez noktası.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="carousel-item">
+                    <div class="destinations-container d-flex justify-content-center gap-3 flex-wrap">
+                        <div class="destination-card text-center">
+                            <div class="image-city">
+                                <h5>Sidney</h5>
+                                <img src="/images/sydney.png" alt="Sidney" class="city-image" />
+                                
+                                <p>Harika plajlar ve mimari.</p>
+                            </div>
+                        </div>
+                        <div class="destination-card text-center">
+                            <div class="image-city">
+                                <h5>Cape Town</h5>
+                                <img src="/images/capetown.png" alt="Cape Town" class="city-image" />
+                                 
+                                <p>Doğa ve şehir hayatının birleştiği yer.</p>
+                            </div>
+                        </div>
+                        <div class="destination-card text-center">
+                            <div class="image-city">
+                                <h5>Rio de Janeiro</h5>
+                                <img src="/images/rio.png" alt="Rio de Janeiro" class="city-image" />
+                                
+                                <p>Karnavalın ve plajların şehri.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#destinationCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true" style="background-color:lightgray;"></span>
+                <span class="visually-hidden">Önceki</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#destinationCarousel" data-bs-slide="next" style="color:black;">
+                <span class="carousel-control-next-icon" aria-hidden="true" style="background-color:lightgray;"></span>
+                <span class="visually-hidden">Sonraki</span>
+            </button>
+        </div>
+    </section>
+
+
+    <div id="cityModal" class="modal-overlay" style="display:none;">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeCityInfo()">&times;</span>
+            <img src="" id="cityModalImage" class="img-fluid mb-3" alt="Şehir Görseli" />
+            <div id="cityModalDetails">
+                <h5>Şehir Adı</h5>
+                <p id="cityDescription">Şehir Açıklaması</p>
+            </div>
+        </div>
     </div>
-</footer>
+
+    <section id="developers" class="container py-5 bg-light" style="background-color: rgba(255, 255, 255, 0.85) !important;">
+        <div class="text-center">
+            <h2 class="mb-4">Geliştiriciler</h2>
+        </div>
+        
+        <div class="developers-container d-flex justify-content-center gap-3">
+            <div class="developer-card text-center">
+                <img src="/images/dev.png" class="rounded-circle mb-3" alt="Developer 1" />
+                <h5>-----</h5>
+                <p>Backend Developer</p>
+            </div>
+
+            <div class="developer-card text-center">
+                <img src="/images/dev.png" class="rounded-circle mb-3" alt="Developer 2" />
+                <h5>-----</h5>
+                <p>Frontend Developer</p>
+            </div>
+
+            <div class="developer-card text-center">
+                <img src="/images/dev.png" class="rounded-circle mb-3" alt="Developer 3" />
+                <h5>----</h5>
+                <p>AI Specialist</p>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-12 text-center">
+                <a class="btn btn-outline-primary btn-lg mx-2" id="register" asp-area="Identity" asp-page="/Account/Register">Register</a>
+                <a class="btn btn-outline-primary btn-lg mx-2" id="login" asp-area="Identity" asp-page="/Account/Login">Login</a>
+            </div>
+        </div>
+    </section>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+
+        const cityData = {
+            city1: {
+                name: 'İstanbul',
+                description: 'İstanbul, tarihi ve modern yaşamın eşsiz bir şekilde iç içe geçtiği bir şehirdir. Boğaz\'ın eşsiz manzarası ve tarihi yapılarıyla her zaman büyüler.',
+                image: '/images/ist1.png'
+            },
+            city2: {
+                name: 'Paris',
+                description: 'Paris, romantizmin ve sanatın merkezi olarak bilinir. Seine Nehri boyunca yürüyüş yapın ve Eyfel Kulesi\'nin nefes kesici manzarasını görün.',
+                image: '/images/paris.png'
+            },
+            city3: {
+                name: 'Tokyo',
+                description: 'Tokyo, modern ve geleneksel öğelerin büyüleyici bir karışımını sunan bir şehirdir. Neon ışıkları ve tarihi tapınaklarıyla büyüler.',
+                image: '/images/tokyo.png'
+            },
+            city4: {
+                name: 'Londra',
+                description: 'Londra, tarihi yapıları ve modern yaşamı ile tanınır. Thames Nehri boyunca yürüyüş yapabilir ve şehrin ikonik yapılarının tadını çıkarabilirsiniz.',
+                image: '/images/london.png'
+            },
+            city5: {
+                name: 'Roma',
+                description: 'Roma, tarihi zenginlikleri ve antik yapıları ile ünlüdür. Colosseum ve Vatikan\'ı ziyaret edin.',
+                image: '/images/roma.png'
+            },
+            city6: {
+                name: 'New York',
+                description: 'New York, dünya çapında tanınan simge yapıları ve dinamik şehir hayatı ile ünlüdür. Times Meydanı ve Central Park\'ı keşfedin.',
+                image: '/images/newyork.png'
+            },
+            city7: {
+                name: 'Sidney',
+                description: 'Sidney, güzel plajları ve Opera Binası ile tanınır. Plajlarda vakit geçirin ve şehirdeki kültürel etkinliklerin tadını çıkarın.',
+                image: '/images/sydney.png'
+            },
+            city8: {
+                name: 'Cape Town',
+                description: 'Cape Town, doğal güzellikleri ve eşsiz manzaraları ile tanınır. Masa Dağı ve sahil bölgelerini keşfedin.',
+                image: '/images/capetown.png'
+            },
+            city9: {
+                name: 'Rio de Janeiro',
+                description: 'Rio de Janeiro, karnavalı ve plajları ile ünlüdür. Şehrin renkli kültürü ve sahil yaşamını deneyimleyin.',
+                image: '/images/rio.png'
+            }
+        };
+
+        // Tıklama olaylarını destination-card üzerinde tanımlayın
+        document.querySelectorAll('.destination-card').forEach((card, index) => {
+            card.addEventListener('click', function () {
+                const cityKey = `city${index + 1}`;
+                openCityInfo(cityKey);
+            });
+        });
+
+        function openCityInfo(cityKey) {
+            const city = cityData[cityKey];
+            document.getElementById('cityModalImage').src = city.image;
+            document.getElementById('cityModalDetails').querySelector('h5').textContent = city.name;
+            document.getElementById('cityDescription').textContent = city.description;
+            document.getElementById('cityModal').style.display = 'flex';
+        }
+
+        function closeCityInfo() {
+            document.getElementById('cityModal').style.display = 'none';
+        }
 
 
-<script src="~/lib/jquery/dist/jquery.min.js"></script>
-<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-<script src="~/js/site.js" asp-append-version="true"></script>
+        const backgroundImages = [
+            '/images/travel1.png',
+            '/images/travel6.png',
+            '/images/travel7.png',
+            '/images/travel8.png',
+            '/images/travel9.png'
+        ];
 
+        let currentImageIndex = 0;
+
+        function changeBackgroundImage() {
+            currentImageIndex = (currentImageIndex + 1) % backgroundImages.length;
+            const heroSection = document.querySelector('.hero-section');
+            heroSection.style.backgroundImage = `url(${backgroundImages[currentImageIndex]})`;
+            heroSection.classList.add('slide');
+
+            setTimeout(() => {
+                heroSection.classList.remove('slide');
+            }, 1000);
+        }
+
+        setInterval(changeBackgroundImage, 3000);
+    </script>
+}
+
+<style>
+    .image-city h5 {
+ /* İstediğiniz boyutu buraya girin */
+        font-weight: bold; /* Yazı tipi kalınlığı için isteğe bağlı */
+    }
+    .hero-section {
+        position: relative;
+        z-index: 1;
+        color: white;
+        background-image: url('/images/travel1.png'); 
+        background-size: cover;
+        background-position: center;
+        transition: background-image 1s ease-in-out;
+    }
+
+    .slide {
+        animation: slideIn 1s ease-in-out forwards;
+    }
+
+    keyframes slideIn {
+        0% {
+            transform: translateX(100%);
+        }
+        100% {
+            transform: translateX(0);
+        }
+    }
+
+    .developer-card {
+        background-color: rgba(255, 255, 255, 0.9);
+        border: 1px solid #ddd;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        transition: transform 0.3s;
+        width: 300px;
+        height: 350px;
+        padding-top: 25px;
+    }
+
+    .developer-card:hover {
+        transform: scale(1.05);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .developers-container {
+        display: flex;
+        justify-content: center;
+        gap: 20px; 
+        flex-wrap: wrap;
+    }
+
+    #about,
+    #how-to-use,
+    #developers,
+    #popular-destinations {
+        max-width: 85%;
+        margin: auto;
+        background-color: rgba(255, 255, 255, 0.85);
+        
+    }
+
+    #about,
+    #developers,
+    #popular-destinations {
+        margin-top: 20px;
+        margin-bottom: 20px;
+    }
+
+    .overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.4);
+        z-index: 0;
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    .scroll-down-indicator {
+        position: absolute;
+        bottom: 20px;
+        width: 100%;
+        text-align: center;
+        z-index: 1;
+    }
+
+    .scroll-down-indicator img {
+        width: 40px;
+        animation: bounce 2s infinite;
+    }
+
+    keyframes bounce {
+        0%, 100% {
+            transform: translateY(0);
+        }
+        50% {
+            transform: translateY(10px);
+        }
+    }
+
+    .lead {
+        font-size: 1.5rem;
+        color: #ccc;
+    }
+
+    .rounded-circle {
+        width: 150px;
+        height: 150px;
+        object-fit: cover;
+    }
+
+    section {
+        padding: 60px 0;
+    }
+
+    h2 {
+        color: #0056b3;
+        margin-bottom: 30px;
+    }
+
+    .container p {
+        font-size: 1.2rem;
+        line-height: 1.7;
+        color: #555;
+    }
+
+    .btn-lg {
+        padding: 15px 30px;
+        font-size: 1.25rem;
+    }
+
+    .btn-outline-primary {
+        color: #007bff;
+        border-color: #007bff;
+        transition: all 0.3s ease-in-out;
+    }
+
+    .btn-outline-primary:hover {
+        background-color: #007bff;
+        color: white;
+        box-shadow: 0px 4px 15px rgba(0, 123, 255, 0.5);
+    }
+
+    .col-md-4 img {
+        transition: transform 0.3s;
+    }
+
+    .col-md-4 img:hover {
+        transform: scale(1.05);
+    }
+
+    .how-to-step {
+        background-color: #f8f9fa;
+        transition: transform 0.3s;
+    }
+
+    .how-to-step:hover {
+        transform: scale(1.05);
+        box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .how-to-step h5 {
+        color: #0056b3;
+        margin-bottom: 15px;
+    }
+
+    #how-to-use .col-md-4 {
+        margin-bottom: 30px;
+    }
+        .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    }
+
+    .modal-content {
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        position: relative;
+        width: 80%;
+        max-width: 600px;
+    }
+
+    .close-button {
+        position: absolute;
+        top: 0;
+        right: 5px;
+        font-size: 30px;
+        cursor: pointer;
+        background: none;
+        border: none;
+        color: #333;
+    }
+
+    .destination-card {
+        border-radius:15px;
+        background-color: rgba(255, 255, 255, 0.9);
+        border: 1px solid #ddd;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        transition: transform 0.3s;
+        width: 300px;
+        height: 370px;
+        padding-top: 15px;
+        cursor: pointer;
+        position: relative;
+    }
+
+    .destination-card:hover {
+        transform: scale(1.05);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .image-container {
+        height: 200px;
+        overflow: hidden;
+    }
+
+    .city-image {
+        width: 100%;
+        height: 165px;
+        object-fit: cover;
+        border-radius: 0 !important;
+        padding: 5px;
+    }
+
+    .description {
+        padding: 10px;
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    .carousel-control-next-icon {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%23000000' viewBox='0 0 16 16'%3E%3Cpath d='M4.646 14.354a.5.5 0 0 0 .708 0l6-6a.5.5 0 0 0 0-.708l-6-6a.5.5 0 1 0-.708.708L10.293 8l-5.647 5.646a.5.5 0 0 0 0 .708z'/%3E%3C/svg%3E");
+    }
+    .carousel-control-prev-icon {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%23000000' viewBox='0 0 16 16'%3E%3Cpath d='M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z'/%3E%3C/svg%3E");
+    }
+    .carousel-item{
+        height:400px;
+        padding:10px;
+    }
+
+</style>
