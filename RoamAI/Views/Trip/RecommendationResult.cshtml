@@ -1,0 +1,165 @@
+﻿@using RoamAI.Models.Entities
+
+<div class="container">
+    <h2 class="text-primary">Seyahat Planı: @Model.City, @Model.Country</h2>
+    <p>Bu seyahat planı başarıyla kaydedildi. <strong>Plan ID:</strong> @ViewBag.TripId</p>
+
+    <h4 class="mt-4">Gezilecek Yerler</h4>
+    <div class="row">
+        @foreach (var location in ViewBag.Locations as List<RoamAI.Models.Entities.Location>)
+        {
+            <div class="col-md-4">
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">@location.LocationName</h5>
+                        <p class="card-text"><strong>Koordinatlar:</strong> @location.Coordinates</p>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <h4 class="mt-4">Şehir Bilgisi</h4>
+    <p>@Model.Description</p>
+
+    <h4 class="mt-4">Harita</h4>
+    <div id="map" style="height: 500px; width: 100%;"></div>
+</div>
+
+<!-- jQuery kütüphanesi -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- Google Maps API Key -->
+<script src="https://maps.googleapis.com/maps/api/js?key=KEYBURADA" async defer></script>
+
+<script>
+    $(document).ready(function () {
+        // ViewBag'den JSON stringini alıp parse ediyoruz
+        var locationsData = '@Html.Raw(ViewBag.LocationCoordinates)';
+        var selectedLocations = []; // Seçilen konumları saklayacağımız dizi
+
+        var locations;
+        // JSON verisi dolu ve geçerli olup olmadığını kontrol ediyoruz
+        if (locationsData && locationsData.trim().length > 0) {
+            try {
+                locations = JSON.parse(locationsData); // JSON veriyi parse ediyoruz
+            } catch (e) {
+                console.error("JSON parsing error:", e); // JSON hatasını yakalıyoruz
+            }
+        } else {
+            console.warn("Location data is empty or invalid.");
+        }
+
+        // Eğer locations verisi başarıyla parse edildiyse haritayı başlatıyoruz
+        if (locations && Object.keys(locations).length > 0) {
+            var firstLocationKey = Object.keys(locations)[0];
+            var firstLocationCoords = locations[firstLocationKey].split(',');
+            var firstLat = parseFloat(firstLocationCoords[0]);
+            var firstLng = parseFloat(firstLocationCoords[1]);
+
+            // Haritayı başlat
+            var map = new google.maps.Map(document.getElementById("map"), {
+                center: { lat: firstLat, lng: firstLng },
+                zoom: 12
+            });
+
+            // Her bir konum için marker ekliyoruz
+            Object.keys(locations).forEach(function (key) {
+                var coords = locations[key].split(',');
+                var lat = parseFloat(coords[0]);
+                var lng = parseFloat(coords[1]);
+
+                // Marker oluştur
+                var marker = new google.maps.Marker({
+                    position: { lat: lat, lng: lng },
+                    map: map,
+                    title: key
+                });
+
+                var infoContent = `<b>${key}</b><br>
+                                    <button onclick="addLocation(${lat}, ${lng}, '${key}')">Bu konumu rota duraklarına ekle</button><br>
+                                    <a href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}" target="_blank">Tek Rota Oluştur</a>`;
+
+                var infoWindow = new google.maps.InfoWindow({
+                    content: infoContent
+                });
+
+                marker.addListener("click", function () {
+                    infoWindow.open(map, marker);
+                });
+            });
+        }
+
+        // Konumları dizimize ekleyen fonksiyon
+        window.addLocation = function (lat, lng, key) {
+            selectedLocations.push({ lat: lat, lng: lng, name: key });
+            Swal.fire({
+                icon: 'success',
+                title: 'Durak Eklendi',
+                text: `${key} rota duraklarına eklendi!`,
+                timer: 1500,
+                showConfirmButton: false
+            });
+        };
+
+        // Seçili duraklarla çoklu duraklı rota oluşturma
+        $('#createMultiStopRoute').on('click', function () {
+            if (selectedLocations.length === 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Uyarı',
+                    text: 'Rota oluşturmak için en az bir konum seçin!',
+                });
+                return;
+            }
+
+            var routeUrl = "https://www.google.com/maps/dir/?api=1";
+            routeUrl += `&origin=${selectedLocations[0].lat},${selectedLocations[0].lng}`; // İlk seçilen konum başlangıç noktası
+            routeUrl += `&destination=${selectedLocations[selectedLocations.length - 1].lat},${selectedLocations[selectedLocations.length - 1].lng}`; // Son seçilen konum varış noktası
+
+            if (selectedLocations.length > 2) {
+                var waypoints = selectedLocations.slice(1, -1).map(loc => `${loc.lat},${loc.lng}`).join('|');
+                routeUrl += `&waypoints=${waypoints}`;
+            }
+
+            window.open(routeUrl, '_blank');
+
+            selectedLocations = [];
+            Swal.fire({
+                icon: 'info',
+                title: 'Duraklar Sıfırlandı',
+                text: 'Seçili duraklar sıfırlandı. Yeni durakları seçebilirsiniz.',
+                timer: 1500,
+                showConfirmButton: false
+            });
+        });
+
+        // Seçimleri sıfırlama butonu
+        $('#resetLocations').on('click', function () {
+            selectedLocations = [];
+            Swal.fire({
+                icon: 'info',
+                title: 'Seçimler Sıfırlandı',
+                text: 'Tüm seçimler sıfırlandı.',
+                timer: 1500,
+                showConfirmButton: false
+            });
+        });
+    });
+</script>
+
+<style>
+    .container {
+        max-width: 900px;
+        margin-top: 30px;
+    }
+
+    .card {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        transition: 0.3s;
+    }
+
+        .card:hover {
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+        }
+</style>

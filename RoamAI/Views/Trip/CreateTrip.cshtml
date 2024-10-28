@@ -1,107 +1,77 @@
 ﻿@using RoamAI.Models.Entities
 @model Trip
 
-<div class="hero-section text-white text-center d-flex align-items-center justify-content-center" style="min-height: 110vh; background-image: url('/images/travel6.png'); background-size: cover; background-position: center;">
-    <div class="overlay"></div>
-    <div class="hero-content">
+<div>
+    <h2>Travel Planı Oluştur</h2>
+    <form method="post" asp-action="GetRecommendations" asp-controller="Trip">
+        <label>Ülke: </label>
+        <select id="country" name="Country" asp-for="Country" class="choices" required>
+            <option value="">Select Country</option>
+        </select>
+        <br />
 
-        <div class="card mx-auto p-4" style="max-width: 700px; background-color: rgba(255, 255, 255, 0.7); border-radius: 25px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
-            <h2 class="mb-4">Travel Planı Oluştur</h2>
-            <form id="travelForm" method="post" asp-action="GetRecommendations" asp-controller="Trip">
-                <div class="form-group row mb-3">
-                    <label class="col-sm-3 col-form-label">Ülke:</label>
-                    <div class="col-sm-9">
-                        <select id="country" name="Country" asp-for="Country" class="form-control choices" required>
-                            <option value="">Select Country</option>
-                        </select>
-                    </div>
-                </div>
+        <label>Şehir: </label>
+        <select id="city" name="City" asp-for="City" required>
+            <option value="">Select City</option>
+        </select>
+        <br />
 
-                <div class="form-group row mb-3">
-                    <label class="col-sm-3 col-form-label">Şehir:</label>
-                    <div class="col-sm-9">
-                        <select id="city" name="City" asp-for="City" class="form-control" required>
-                            <option value="">Select City</option>
-                        </select>
-                    </div>
-                </div>
+        <label>Gideceğiniz Tarih: </label>
+        <input type="date" name="StartDate" asp-for="StartDate" required />
+        <br />
 
-                <div class="form-group mb-3" style="text-align: center;">
-                    <div class="date-container" style="display: inline-block; margin-right: 60px;">
-                        <label class="col-form-label">Gidiş Tarihi:</label>
-                        <input type="date" name="StartDate" asp-for="StartDate" class="form-control" required style="width: 150px; display: inline-block;" />
-                    </div>
-                    <div class="date-container" style="display: inline-block;">
-                        <label class="col-form-label">Dönüş Tarihi:</label>
-                        <input type="date" name="EndDate" asp-for="EndDate" class="form-control" required style="width: 150px; display: inline-block;" />
-                    </div>
-                </div>
+        <label>Döneceğiniz Tarih: </label>
+        <input type="date" name="EndDate" asp-for="EndDate" required />
+        <br />
 
+        <label>Kültürel Gezi Yüzdesi: </label>
+        <input type="number" name="CulturalPercentage" asp-for="CulturalPercentage" required min="0" max="100" value="40" />
+        <br />
 
-                <fieldset class="form-group row mb-4 p-3 border rounded"> 
-                    <legend class="col-form-label">Gezi Türü Seçiniz</legend>
-                    <div class="form-group row mb-3">
-                        <label class="col-sm-4 col-form-label">Kültürel Gezi:</label>
-                        <div class="col-sm-6">
-                            <input type="range" name="CulturalPercentage" asp-for="CulturalPercentage" required class="form-range slider" min="0" max="100" step="10" value="40" id="culturalRange">
-                        </div>
-                        <div class="col-sm-2">
-                            <span id="culturalValue">40</span>%
-                        </div>
-                    </div>
+        <label>Modern Gezi Yüzdesi: </label>
+        <input type="number" name="EntertainmantPercentage" asp-for="EntertainmantPercentage" required min="0" max="100" value="30" />
+        <br />
 
-                    <div class="form-group row mb-3">
-                        <label class="col-sm-4 col-form-label">Modern Gezi:</label>
-                        <div class="col-sm-6">
-                            <input type="range" name="EntertainmantPercentage" asp-for="EntertainmantPercentage" required class="form-range slider" min="0" max="100" step="10" value="30" id="modernRange">
-                        </div>
-                        <div class="col-sm-2">
-                            <span id="modernValue">30</span>%
-                        </div>
-                    </div>
+        <label>Yemek Üzerine Gezi Yüzdesi: </label>
+        <input type="number" name="FoodPercentage" asp-for="FoodPercentage" required min="0" max="100" value="30" />
+        <br />
 
-                    <div class="form-group row mb-3">
-                        <label class="col-sm-4 col-form-label">Yemek Üzerine Gezi:</label>
-                        <div class="col-sm-6">
-                            <input type="range" name="FoodPercentage" asp-for="FoodPercentage" required class="form-range slider" min="0" max="100" step="10" value="30" id="foodRange">
-                        </div>
-                        <div class="col-sm-2">
-                            <span id="foodValue">30</span>%
-                        </div>
-                    </div>
-                </fieldset>
+        <button type="submit" id="submitBtn">Plan Oluştur</button>
+    </form>
 
-
-                <button type="submit" id="submitBtn" class="btn btn-outline-primary btn-lg btn-block" style="border-width: 3px; border-color:royalblue">Plan Oluştur</button>
-            </form>
-            <!-- <div id="weatherInfo" class="mt-4"></div> -->
-            
-        </div>
-
-        @if (Model != null && Model.Locations != null && Model.Locations.Any())
-        {
-            <div class="card mx-auto p-4 mt-4" style="max-width: 700px; background-color: rgba(255, 255, 255, 0.7); border-radius: 10px;">
-                <h3>Gezilecek Yerler</h3>
-                <ul>
-                    @foreach (var recommendation in Model.Locations)
-                    {
-                        <li>@recommendation.LocationName</li>
-                    }
-                </ul>
+    @if (Model != null && Model.Locations != null && Model.Locations.Any())
+    {
+        <h3>Gezilecek Yerler</h3>
+        <ul>
+            @foreach (var recommendation in Model.Locations)
+            {
+                <li>@recommendation.LocationName</li>
+            }
+        </ul>
 
         <h3>@Model.City hakkında Bilgiler</h3>
         <p>@Model.Description</p> <!-- Şehir hakkında bilgiyi burada gösteriyoruz. -->
 
 
-                <h3>Harita</h3>
-                <div id="map" style="height: 500px; width: 100%;"></div>
-                <button id="createMultiStopRoute" style="margin-top: 20px;">Seçili Duraklarla Rota Oluştur</button>
-                <button id="resetLocations" style="margin-top: 20px; margin-left: 10px;">Seçimleri Sıfırla</button>
-            </div>
-        }
-    </div>
+        <h3>Harita</h3>
+        <div id="map" style="height: 500px; width: 100%;"></div> <!-- Harita burada oluşturulacak -->
+        <button id="createMultiStopRoute" style="margin-top: 20px;">Seçili Duraklarla Rota Oluştur</button>
+        <button id="resetLocations" style="margin-top: 20px; margin-left: 10px;">Seçimleri Sıfırla</button>
+
+    }
 </div>
 
+
+
+<div id="recommendations" style="display:none;">
+    <h3>Gezilecek Yerler</h3>
+    <ul id="locationList"></ul>
+    <h3>Şehir Bilgisi</h3>
+    <p id="cityInfo"></p>
+    <h3>Harita</h3>
+    <div id="map" style="height: 500px; width: 100%;"></div>
+    <p>Bu seyahat planı başarıyla kaydedildi. <strong>Trip ID:</strong> <span id="tripId"></span></p>
+</div>
 
 <!-- Choices.js CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
@@ -126,8 +96,63 @@
 
 <!-- Google Maps API Key ile Script -->
 
-<!-- Buraya key yapistir. -->
+<script src="https://maps.googleapis.com/maps/api/js?key=KEYBURAYA"></script>
 
+<script>
+    $(document).ready(function () {
+        $('#travelForm').submit(function (e) {
+            e.preventDefault();
+
+            // Form verilerini alın
+            var formData = $(this).serialize();
+
+            // AJAX ile GetRecommendations metoduna istekte bulunun
+            $.ajax({
+                url: '@Url.Action("GetRecommendations", "Trip")',
+                type: 'POST',
+                data: formData,
+                success: function (response) {
+                    // Öneri alanlarını doldurun
+                    $('#recommendations').show();
+                    $('#locationList').empty();
+                    $('#cityInfo').text(response.cityInfo);
+                    $('#tripId').text(response.tripId); // Trip ID'yi göster
+
+                    response.locations.forEach(location => {
+                        $('#locationList').append(`<li>${location.LocationName} (${location.Coordinates})</li>`);
+                    });
+
+                    // Haritayı güncelleyin
+                    initializeMap(response.locations);
+                },
+                error: function (xhr, status, error) {
+                    alert('Bir hata oluştu: ' + error);
+                }
+            });
+        });
+
+        // Harita başlatma fonksiyonu
+        function initializeMap(locations) {
+            if (locations.length > 0) {
+                var firstLocation = locations[0];
+                var firstCoords = firstLocation.Coordinates.split(',');
+                var map = new google.maps.Map(document.getElementById("map"), {
+                    center: { lat: parseFloat(firstCoords[0]), lng: parseFloat(firstCoords[1]) },
+                    zoom: 12
+                });
+
+                locations.forEach(location => {
+                    var coords = location.Coordinates.split(',');
+                    var marker = new google.maps.Marker({
+                        position: { lat: parseFloat(coords[0]), lng: parseFloat(coords[1]) },
+                        map: map,
+                        title: location.LocationName
+                    });
+                });
+            }
+        }
+    });
+</script>
 
 <script>
     $(document).ready(function () {
@@ -250,13 +275,6 @@
             searchPlaceholderValue: 'Aramak için yazın...'
         });
 
-        // Şehir seçim dropdown'ına Choices.js uygulayalım
-        let citySelect = new Choices('#city', {
-            searchEnabled: true,
-            placeholderValue: 'Şehir Seçiniz',
-            searchPlaceholderValue: 'Aramak için yazın...'
-        });
-
         var citiesData = [];
         $.getJSON('/data/countries.json', function (data) {
             // Ülkeler için seçenekler ekle
@@ -276,230 +294,36 @@
 
         $('#country').change(function () {
             var selectedCountryId = $(this).val();
+            var $citySelect = $('#city');
+            $citySelect.empty(); // Önceki şehirleri temizle
+            $citySelect.append($('<option>', { value: '', text: 'Select City' }));
 
-            citySelect.destroy(); // Eski Choices.js instance'ını yok et
-
-            $('#city').empty(); // Şehir dropdown'ını temizle
-            $('#city').append($('<option>', { value: '', text: 'Şehir Seçiniz' })); // Varsayılan seçenek ekle
-
-            var filteredCities = citiesData.filter(function (city) {
-                return city.countryId == selectedCountryId;
-            });
-
-            // Şehirleri select kutusuna ekle
-            $.each(filteredCities, function (index, city) {
-                $('#city').append($('<option>', {
-                    value: city.name, // şehir adını doğrudan API isteğinde kullanmak için
-                    text: city.name
-                }));
-            });
-
-            // Yeniden Choices.js instance'ını oluştur
-            citySelect = new Choices('#city', { searchEnabled: true });
-        });
-
-        @* // İki tarih arasındaki gün farkını hesaplayan fonksiyon
-        function getDayDifference(startDate, endDate) {
-            const start = new Date(startDate);
-            const end = new Date(endDate);
-            const timeDiff = end.getTime() - start.getTime();
-            const dayDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
-            return dayDiff;
-        }
-
-        // WeatherAPI'den tahmini hava durumu al ve tablo şeklinde göster
-        function getForecastWeather(cityName, days) {
-            const apiKey = '135a7c250dd541e7b4e40644242110';
-            const url = `https://api.weatherapi.com/v1/forecast.json?key=${apiKey}&q=${cityName}&days=${days}`;
-
-            $.getJSON(url, function (data) {
-                let forecastHtml = `<h4>${cityName} için ${days} günlük hava durumu tahmini</h4>`;
-                forecastHtml += `<table class="table table-bordered text-white">`;
-                forecastHtml += `<thead><tr><th>Tarih</th><th>Sıcaklık (°C)</th><th>Durum</th></tr></thead><tbody>`;
-
-                data.forecast.forecastday.forEach(function (day) {
-                    const date = day.date;
-                    const temp = day.day.avgtemp_c;
-                    const condition = day.day.condition.text;
-                    const icon = day.day.condition.icon;
-
-                    forecastHtml += `
-                        <tr>
-                            <td>${date}</td>
-                            <td>${temp}°C</td>
-                            <td>${condition} <img src="${icon}" alt="icon"></td>
-                        </tr>
-                    `;
+            if (selectedCountryId) {
+                var filteredCities = citiesData.filter(function (city) {
+                    return city.countryId === selectedCountryId;
                 });
 
-                forecastHtml += `</tbody></table>`;
-
-                // Hava durumu bilgisini tablo olarak ekrana yazdır
-                $('#weatherInfo').html(forecastHtml);
-            }).fail(function () {
-                $('#weatherInfo').html('<p>Hava durumu bilgisi alınamadı.</p>'); 
-            });
-        }
-
-        // Form gönderildiğinde hava durumu bilgisini al
-        $('#travelForm').submit(function (e) {
-            e.preventDefault(); // Formun normal gönderimini engelle
-
-            const cityName = $('#city').find('option:selected').val();
-            const startDate = $('input[name="StartDate"]').val();
-            const endDate = $('input[name="EndDate"]').val();
-            const days = getDayDifference(startDate, endDate);
-
-            if (cityName && days > 0) {
-                getForecastWeather(cityName, days); // Tahmini hava durumu verisini tablo olarak al
+                // Şehirleri select kutusuna ekle
+                $.each(filteredCities, function (index, city) {
+                    $citySelect.append($('<option>', {
+                        value: city.id,
+                        text: city.name
+                    }));
+                });
             }
+        });
 
-            // Formu sunucuya göndermeye devam et
-            this.submit();
-        });*@
+        // Yüzde kontrolü: Toplam %100 olmalı
+        $('#submitBtn').click(function (e) {
+            var cultural = parseInt($('input[name="CulturalPercentage"]').val(), 10) || 0;
+            var modern = parseInt($('input[name="EntertainmantPercentage"]').val(), 10) || 0;
+            var food = parseInt($('input[name="FoodPercentage"]').val(), 10) || 0;
+            var total = cultural + modern + food;
 
-        // Slider değerlerini güncelleme fonksiyonu
-        function updateSliderValue(slider, displayElementId) {
-            document.getElementById(displayElementId).innerText = slider.value;
-        }
-
-        // Slider'ları izleme ve toplam değerin 100'ü geçmesini engelleme fonksiyonu
-        function handleSliderInput(slider, displayElementId) {
-            slider.on('input', function () {
-                var cultural = parseInt($('#culturalRange').val(), 10) || 0;
-                var modern = parseInt($('#modernRange').val(), 10) || 0;
-                var food = parseInt($('#foodRange').val(), 10) || 0;
-                var total = cultural + modern + food;
-
-                if (total <= 100) {
-                    updateSliderValue(slider[0], displayElementId);
-                } else {
-                    slider.val(slider.data('prevValue'));
-                }
-            });
-
-            slider.on('change', function () {
-                slider.data('prevValue', slider.val());
-            });
-        }
-
-        handleSliderInput($('#culturalRange'), 'culturalValue');
-        handleSliderInput($('#modernRange'), 'modernValue');
-        handleSliderInput($('#foodRange'), 'foodValue');
-
-        // Sayfa yüklendiğinde varsayılan değerleri kaydet
-        $('#culturalRange').data('prevValue', $('#culturalRange').val());
-        $('#modernRange').data('prevValue', $('#modernRange').val());
-        $('#foodRange').data('prevValue', $('#foodRange').val());
+            if (total !== 100) {
+                e.preventDefault(); // Formun gönderilmesini engelle
+                alert('Gezi türü yüzdelerinin toplamı 100 olmalıdır!');
+            }
+        });
     });
-
 </script>
-
-<style>
-    .hero-section {
-        position: relative;
-        width: 100%;
-        min-height: 100vh;
-        background-image: url('/images/travel-background.png');
-        background-size: cover;
-        background-position: center;
-        padding-top: 75px;
-    }
-
-    .overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.3);
-        z-index: 0;
-    }
-
-    .hero-content {
-        position: relative;
-        z-index: 1;
-        width: 100%;
-        text-align: center;
-    }
-
-    .card {
-        background-color: rgba(255, 255, 255, 0.7);
-        border-radius: 10px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        color: #333;
-    }
-
-    .form-control {
-        color: #333;
-    }
-
-    label {
-        color: #333;
-    }
-
-    .slider {
-        -webkit-appearance: none;
-        appearance: none;
-        width: 100%;
-        height: 8px;
-        background: #007bff;
-        outline: none;
-        opacity: 0.8;
-        transition: opacity 0.2s;
-        border-radius: 5px;
-    }
-
-    .slider:hover {
-        opacity: 1;
-    }
-
-    .slider::-webkit-slider-thumb {
-        -webkit-appearance: none;
-        appearance: none;
-        width: 20px;
-        height: 20px;
-        background: #fff;
-        border: 2px solid #007bff;
-        border-radius: 50%;
-        cursor: pointer;
-    }
-
-    .slider::-moz-range-thumb {
-        width: 20px;
-        height: 20px;
-        background: #fff;
-        border: 2px solid #007bff;
-        border-radius: 50%;
-        cursor: pointer;
-    }
-
-    #weatherInfo table {
-        margin: 0 auto;
-        background-color: rgba(0, 0, 0, 0.7);
-    }
-
-    #weatherInfo th, #weatherInfo td {
-        color: white;
-        text-align: center;
-    }
-    .form-group .form-control {
-        width: 100%;
-    }
-
-    fieldset {
-        background-color: rgba(255, 255, 255, 0.8);
-        border: 1px solid #007bff;
-    }
-
-    .slider-container {
-        padding: 10px;
-    }
-
-    legend {
-        font-size: 1.2rem;
-        font-weight: bold;
-    }
-
-
-</style>

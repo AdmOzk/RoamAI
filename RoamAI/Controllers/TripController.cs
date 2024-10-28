@@ -6,17 +6,16 @@ using RoamAI.Context;
 using RoamAI.Models;
 using RoamAI.Models.Entities;
 using RoamAI.Services;
-using System.Collections;
+using System.Collections.Generic;
 using System.Security.Claims;
-using System.Security.Cryptography;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace RoamAI.Controllers
 {
     public class TripController : Controller
     {
-
-        private readonly ApplicationDbContext  _db;
+        private readonly ApplicationDbContext _db;
         private readonly ClaudeService _claudeService;
         private readonly UserManager<IdentityUser> _userManager;
 
@@ -25,61 +24,47 @@ namespace RoamAI.Controllers
             _db = db;
             _claudeService = claudeService;
             _userManager = userManager;
-
-
         }
 
-
-
         // GET: TripController
-        public ActionResult Index()
+        public async Task<ActionResult> Index()
         {
-            
-            
-
             return View();
         }
 
-        public ActionResult CurrentTrip()
+        public async Task<ActionResult> CurrentTrip()
         {
-            var user = _userManager.GetUserAsync(User);
-            var userId = user.Result.Id;
-            var trip = _db.Trips.FirstOrDefault(x => x.IdentityUserId == userId && x.IsDone == false);
-
+            var user = await _userManager.GetUserAsync(User);
+            var userId = user.Id;
+            var trip = await _db.Trips
+               .Include(t => t.Locations)
+               .FirstOrDefaultAsync(x => x.IdentityUserId == userId && x.IsDone == false);
 
             return View(trip);
         }
 
-
-        public ActionResult TripDetail(int tripId)
+        public async Task<ActionResult> TripDetail(int tripId)
         {
-            var trip = _db.Trips.Where(x => x.Id == tripId && x.IsDone == true).ToList();
-
-
+            var trip = await _db.Trips.Where(x => x.Id == tripId && x.IsDone == true).ToListAsync();
             return View(trip);
         }
 
-        public ActionResult MyTrips()
+        public async Task<ActionResult> MyTrips()
         {
-            var user = _userManager.GetUserAsync(User);
-            var userId = user.Result.Id;
-            var trip = getTripsByUserId(userId);
-
-
-            return View(trip);
+            var user = await _userManager.GetUserAsync(User);
+            var userId = user.Id;
+            var trips = await getTripsByUserIdAsync(userId);
+            return View(trips);
         }
-
-
-
 
         // GET: TripController/Details/5
-        public ActionResult Details(int id)
+        public async Task<ActionResult> Details(int id)
         {
             return View();
         }
 
         // GET: TripController/Create
-        public ActionResult CreateTrip()
+        public async Task<ActionResult> CreateTrip()
         {
             return View();
         }
@@ -87,128 +72,74 @@ namespace RoamAI.Controllers
         // POST: TripController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult CreateTrip(Trip trip)
+        public async Task<ActionResult> CreateTrip(Trip trip)
         {
+            // Kullanıcı bilgilerini asenkron olarak alın
+            var user = await _userManager.GetUserAsync(User);
 
-            foreach(var loc in trip.Locations)
+            // Kullanıcı kimliğini ve kullanıcıyı trip nesnesine atayın
+            trip.IdentityUserId = user.Id;
+            trip.IdentityUser = user;
+
+            // Trip nesnesine bağlı Locations koleksiyonuna bağlı her bir konumu ekleyin
+            foreach (var loc in trip.Locations)
             {
                 loc.Trip = trip;
-
                 _db.Locations.Add(loc);
             }
-            var user = _userManager.GetUserAsync(User);
-            _db.SaveChanges();
-            
 
-            var newTrip = new Trip()
-            {
-                EntertainmantPercentage = trip.EntertainmantPercentage,
-                FoodPercentage = trip.FoodPercentage,
-                CulturalPercentage = trip.CulturalPercentage, 
-                DayCountToStay = trip.DayCountToStay,
-                StartDate = trip.StartDate,
-                EndDate = trip.EndDate,
-                Country = trip.Country,
-                City = trip.City,
-                Score = trip.Score,
-                IsDone = false,
-                Locations = trip.Locations, 
-                Description = trip.Description,
-                IdentityUser = user.Result,
-                IdentityUserId = user.Result.Id
+            // Trip kaydını ekleyin ve veritabanına kaydedin
+            _db.Trips.Add(trip);
+            await _db.SaveChangesAsync(); // SaveChanges işlemini yalnızca bir kez yapın
 
-
-            };
-
-            _db.Trips.Add(newTrip);
-            
-            _db.SaveChanges();
-
-            return RedirectToAction("CurrentTrip");//todo
-            
+            return RedirectToAction("MyTrips", "Trip");
         }
 
-        public void changeDoneTripStatus(int tripId)
+        public async Task changeDoneTripStatus(int tripId)
         {
-            var trip = _db.Trips.FirstOrDefault(x => x.Id == tripId);
+            var trip = await _db.Trips.FirstOrDefaultAsync(x => x.Id == tripId);
 
-            if(trip != null)
+            if (trip != null)
             {
                 trip.IsDone = true;
-                _db.SaveChanges();
+                await _db.SaveChangesAsync();
             }
         }
 
-        
-        public ActionResult Delete(int id)
+        public async Task<ActionResult> Delete(int id)
         {
-            var trip = _db.Trips.FirstOrDefault(x => x.Id == id);
+            var trip = await _db.Trips.FirstOrDefaultAsync(x => x.Id == id);
 
             if (trip != null)
             {
                 trip.IsDeleted = true;
-                _db.SaveChanges();
+                await _db.SaveChangesAsync();
             }
 
             return RedirectToAction("MyTrips");
         }
-        
 
-
-        public List<Trip> getTripsByUserId(string id)
+        public async Task<List<Trip>> getTripsByUserIdAsync(string id)
         {
-            var trips =  _db.Trips.Where(x=> x.IdentityUserId == id).ToList();   
-
-            return trips;
+            return await _db.Trips.Where(x => x.IdentityUserId == id).ToListAsync();
         }
 
-
-
-        public void GetRecommendations(string country, string city, DateTime StartDate,DateTime EndDate, int culturalPercentage, int entertainmantPercentage, int foodPercentage)
+        [HttpPost]
+        public async Task<IActionResult> GetRecommendations(string country, string city, DateTime StartDate, DateTime EndDate, int culturalPercentage, int entertainmantPercentage, int foodPercentage)
         {
-            // Seyahat önerilerini alıyoruz.
-            var travelRecommendations =  _claudeService.GetTravelRecommendations(country, city, StartDate, EndDate , culturalPercentage, entertainmantPercentage, foodPercentage).Result.text;
+            var travelRecommendations = await _claudeService.GetTravelRecommendations(country, city, StartDate, EndDate, culturalPercentage, entertainmantPercentage, foodPercentage);
+            var cityInformation = await _claudeService.GetCityInformation(country, city);
 
-            // Şehir bilgilerini alıyoruz.
-            var cityInformation =  _claudeService.GetCityInformation(country, city).Result;
+            // Konumları hazırla
+            var locations = travelRecommendations.LocationCoordinates.Select(location => new Location
+            {
+                LocationName = location.Key,
+                Coordinates = location.Value
+            }).ToList();
 
-            var locationCoordinatesJson = System.Text.Json.JsonSerializer.Serialize(ClaudeService.locationCoordinates);
+            var user = await _userManager.GetUserAsync(User);
 
-            // ViewBag'e JSON olarak ekliyoruz
-            ViewBag.LocationCoordinates = locationCoordinatesJson;
-
-            // Sonuçları modele ekliyoruz.
-            //var model = new TravelRequestModel
-            //{
-            //    Country = country,
-            //    City = city,
-            //    StartDate = StartDate,
-            //    EndDate = EndDate,
-            //    CulturalPercentage = culturalPercentage,
-            //    EntertainmantPercentage = entertainmantPercentage,
-            //    FoodPercentage = foodPercentage,
-            //    Recommendations = travelRecommendations.Split('\n').ToList(),
-            //    CityInformation = cityInformation // Şehir bilgisini modele ekledik.
-            //};
-
-            List<Location> locations = new List<Location>();
-            var tempDict = _claudeService.GetTravelRecommendations(country, city, StartDate, EndDate, culturalPercentage, entertainmantPercentage, foodPercentage).Result.LocationCoordinates;
-            //dictionary -> ICollection
-
-            foreach (var location in tempDict) {
-
-                var loc = new Location()
-                {
-                    LocationName = location.Key,
-                    Coordinates = location.Value,
-                };
-
-                locations.Add(loc);
-            
-            
-            }
-
-            tempDict.Clear();
+            // Trip kaydını oluştur ve veritabanına ekle
             var tripModel = new Trip()
             {
                 Country = country,
@@ -221,14 +152,42 @@ namespace RoamAI.Controllers
                 FoodPercentage = foodPercentage,
                 Description = cityInformation,
                 Locations = locations,
-                
-
+                IdentityUser = user,
+                IdentityUserId = user.Id
             };
 
+            _db.Trips.Add(tripModel);
+            await _db.SaveChangesAsync();
 
-            CreateTrip(tripModel);
+            // Verileri ViewBag ile geç
+            ViewBag.Locations = locations;
+            ViewBag.CityInfo = cityInformation;
+            ViewBag.TripId = tripModel.Id;
+
+            return RedirectToAction("RecommendationResult", new { tripId = tripModel.Id });
         }
+
+        [HttpGet]
+        public async Task<IActionResult> RecommendationResult(int tripId)
+        {
+            // Veritabanından Trip kaydını alın
+            var trip = await _db.Trips
+                .Include(t => t.Locations)
+                .FirstOrDefaultAsync(t => t.Id == tripId);
+
+            // Eğer Trip bulunamazsa 404 döndür
+            if (trip == null)
+            {
+                return NotFound();
+            }
+
+            // Görünümde kullanılacak model ve ViewBag verileri
+            ViewBag.Locations = trip.Locations;
+            ViewBag.TripId = tripId;
+
+            return View(trip);
+        }
+
 
     }
 }
-

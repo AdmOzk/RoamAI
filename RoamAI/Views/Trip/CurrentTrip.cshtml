@@ -28,19 +28,19 @@
                 <div class="mb-3 mt-3">
 
                     <h5>Lokasyonlar</h5>
-                    @foreach (var Location in Model.Locations)
+                    @if (Model.Locations != null && Model.Locations.Any())
                     {
-                        <div class="mt-2 p-2 border-success border rounded">
-
-                            <h5 class="border-bottom">@Location.LocationName</h5>
-
-                            <p>@Location.Coordinates</p>
-
-                            
-
-
-                        </div>
-
+                        @foreach (var Location in Model.Locations)
+                        {
+                            <div class="mt-2 p-2 border-success border rounded">
+                                <h5 class="border-bottom">@Location.LocationName</h5>
+                                <p>@Location.Coordinates</p>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p>No locations available for this trip.</p>
                     }
                 </div>
 

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace RoamAI.Models.Entities
 {
@@ -15,6 +16,7 @@ namespace RoamAI.Models.Entities
 
         public int? tripId { get; set; }
 
+        [JsonIgnore]
         public Trip? Trip { get; set; }
 
 
