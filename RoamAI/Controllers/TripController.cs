@@ -179,27 +179,45 @@ namespace RoamAI.Controllers
             await _db.SaveChangesAsync();
 
             // Verileri ViewBag ile geç
-            
-            
+            ViewBag.Locations = locations;
+            ViewBag.CityInfo = cityInformation;
+            ViewBag.TripId = tripModel.Id;
+
 
             return RedirectToAction("RecommendationResult", new { tripId = tripModel.Id });
         }
 
         [HttpGet]
+        [Route("Trip/GetLocations")]
+        public string GetLocations(int tripId)
+        {
+            var locations = _db.Locations
+                .Where(l => l.tripId == tripId)
+                .Select(l => $"{l.LocationName}|{l.Coordinates}")
+                .ToList();
+
+            return string.Join(";", locations);
+        }
+
+
+
+
+        [HttpGet]
         public async Task<IActionResult> RecommendationResult(int tripId)
         {
-            // Veritabanından Trip kaydını alın
             var trip = await _db.Trips
                 .Include(t => t.Locations)
                 .FirstOrDefaultAsync(t => t.Id == tripId);
 
-            // Eğer Trip bulunamazsa 404 döndür
             if (trip == null)
             {
                 return NotFound();
             }
 
-            
+            GetLocations(tripId);
+
+            ViewBag.Locations = trip.Locations; // Marker bilgilerini ViewBag ile geçiyoruz
+            ViewBag.TripId = tripId;
 
             return View(trip);
         }

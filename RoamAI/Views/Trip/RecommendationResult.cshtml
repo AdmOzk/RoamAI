@@ -28,131 +28,132 @@
     <h4 class="mt-4">Şehir Bilgisi</h4>
     <p>@Model.Description</p>
 
-    <h4 class="mt-4">Harita</h4>
-    <div id="map" style="height: 500px; width: 100%;"></div>
+    <h2>Location Map</h2>
+    <div id="map"></div>
+
+
+    <!-- Buttons for creating and resetting routes -->
+    <button id="createMultiStopRoute" class="btn btn-primary mt-3">Çoklu Duraklı Rota Oluştur</button>
+    <button id="resetLocations" class="btn btn-secondary mt-3">Seçimleri Sıfırla</button>
+
 </div>
 
-<!-- jQuery kütüphanesi -->
+<!-- Include SweetAlert2 for notifications -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- Google Maps API script without the marker library -->
+<script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&callback=initMap" async defer></script>
 
-<!-- Google Maps API Key -->
-<script src="https://maps.googleapis.com/maps/api/js?key=KEYBURADA" async defer></script>
+<script>
+    let selectedLocations = []; // Array to store selected locations
 
-@* <script>
-    $(document).ready(function () {
-        // ViewBag'den JSON stringini alıp parse ediyoruz
-        var locationsData = '@Html.Raw(ViewBag.LocationCoordinates)';
-        var selectedLocations = []; // Seçilen konumları saklayacağımız dizi
-
-        var locations;
-        // JSON verisi dolu ve geçerli olup olmadığını kontrol ediyoruz
-        if (locationsData && locationsData.trim().length > 0) {
-            try {
-                locations = JSON.parse(locationsData); // JSON veriyi parse ediyoruz
-            } catch (e) {
-                console.error("JSON parsing error:", e); // JSON hatasını yakalıyoruz
-            }
-        } else {
-            console.warn("Location data is empty or invalid.");
-        }
-
-        // Eğer locations verisi başarıyla parse edildiyse haritayı başlatıyoruz
-        if (locations && Object.keys(locations).length > 0) {
-            var firstLocationKey = Object.keys(locations)[0];
-            var firstLocationCoords = locations[firstLocationKey].split(',');
-            var firstLat = parseFloat(firstLocationCoords[0]);
-            var firstLng = parseFloat(firstLocationCoords[1]);
-
-            // Haritayı başlat
-            var map = new google.maps.Map(document.getElementById("map"), {
-                center: { lat: firstLat, lng: firstLng },
-                zoom: 12
-            });
-
-            // Her bir konum için marker ekliyoruz
-            Object.keys(locations).forEach(function (key) {
-                var coords = locations[key].split(',');
-                var lat = parseFloat(coords[0]);
-                var lng = parseFloat(coords[1]);
-
-                // Marker oluştur
-                var marker = new google.maps.Marker({
-                    position: { lat: lat, lng: lng },
-                    map: map,
-                    title: key
-                });
-
-                var infoContent = `<b>${key}</b><br>
-                                    <button onclick="addLocation(${lat}, ${lng}, '${key}')">Bu konumu rota duraklarına ekle</button><br>
-                                    <a href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}" target="_blank">Tek Rota Oluştur</a>`;
-
-                var infoWindow = new google.maps.InfoWindow({
-                    content: infoContent
-                });
-
-                marker.addListener("click", function () {
-                    infoWindow.open(map, marker);
-                });
-            });
-        }
-
-        // Konumları dizimize ekleyen fonksiyon
-        window.addLocation = function (lat, lng, key) {
-            selectedLocations.push({ lat: lat, lng: lng, name: key });
-            Swal.fire({
-                icon: 'success',
-                title: 'Durak Eklendi',
-                text: `${key} rota duraklarına eklendi!`,
-                timer: 1500,
-                showConfirmButton: false
-            });
+    function initMap() {
+        const mapOptions = {
+            zoom: 10,
+            center: { lat: 39.925533, lng: 32.866287 } // Default location (e.g., Ankara, Turkey)
         };
 
-        // Seçili duraklarla çoklu duraklı rota oluşturma
-        $('#createMultiStopRoute').on('click', function () {
-            if (selectedLocations.length === 0) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Uyarı',
-                    text: 'Rota oluşturmak için en az bir konum seçin!',
-                });
-                return;
-            }
+        const map = new google.maps.Map(document.getElementById("map"), mapOptions);
 
-            var routeUrl = "https://www.google.com/maps/dir/?api=1";
-            routeUrl += `&origin=${selectedLocations[0].lat},${selectedLocations[0].lng}`; // İlk seçilen konum başlangıç noktası
-            routeUrl += `&destination=${selectedLocations[selectedLocations.length - 1].lat},${selectedLocations[selectedLocations.length - 1].lng}`; // Son seçilen konum varış noktası
+        // Fetch the location data as a plain string
+        $.get(`/Trip/GetLocations?tripId=@ViewBag.TripId`, function (data) {
+            const locations = data.split(";");
 
-            if (selectedLocations.length > 2) {
-                var waypoints = selectedLocations.slice(1, -1).map(loc => `${loc.lat},${loc.lng}`).join('|');
-                routeUrl += `&waypoints=${waypoints}`;
-            }
+            locations.forEach(locationStr => {
+                const [name, coordString] = locationStr.split("|");
+                const coords = parseCoordinates(coordString);
 
-            window.open(routeUrl, '_blank');
+                if (coords) {
+                    const marker = new google.maps.Marker({
+                        position: coords,
+                        map: map,
+                        title: name
+                    });
 
-            selectedLocations = [];
-            Swal.fire({
-                icon: 'info',
-                title: 'Duraklar Sıfırlandı',
-                text: 'Seçili duraklar sıfırlandı. Yeni durakları seçebilirsiniz.',
-                timer: 1500,
-                showConfirmButton: false
+                    // Info window with button to add location
+                    const infoContent = `<b>${name}</b><br>
+                            <button onclick="addLocation(${coords.lat}, ${coords.lng}, '${name}')">Bu konumu rota duraklarına ekle</button><br>
+                            <a href="https://www.google.com/maps/dir/?api=1&destination=${coords.lat},${coords.lng}" target="_blank">Tek Rota Oluştur</a>`;
+
+                    const infoWindow = new google.maps.InfoWindow({ content: infoContent });
+
+                    marker.addListener("click", () => infoWindow.open(map, marker));
+                }
             });
         });
+    }
 
-        // Seçimleri sıfırlama butonu
-        $('#resetLocations').on('click', function () {
-            selectedLocations = [];
+    function parseCoordinates(coordinateString) {
+        const regex = /([-+]?\d*\.\d+|\d+)[°]\s*([NS]),\s*([-+]?\d*\.\d+|\d+)[°]\s*([EW])/;
+        const match = coordinateString.match(regex);
+
+        if (!match) return null;
+
+        let lat = parseFloat(match[1]);
+        let lng = parseFloat(match[3]);
+
+        if (match[2] === "S") lat = -lat;
+        if (match[4] === "W") lng = -lng;
+
+        return { lat, lng };
+    }
+
+    // Add location to the route
+    window.addLocation = function (lat, lng, key) {
+        selectedLocations.push({ lat, lng, name: key });
+        Swal.fire({
+            icon: 'success',
+            title: 'Durak Eklendi',
+            text: `${key} rota duraklarına eklendi!`,
+            timer: 1500,
+            showConfirmButton: false
+        });
+    };
+
+    // Create multi-stop route
+    $('#createMultiStopRoute').on('click', function () {
+        if (selectedLocations.length === 0) {
             Swal.fire({
-                icon: 'info',
-                title: 'Seçimler Sıfırlandı',
-                text: 'Tüm seçimler sıfırlandı.',
-                timer: 1500,
-                showConfirmButton: false
+                icon: 'warning',
+                title: 'Uyarı',
+                text: 'Rota oluşturmak için en az bir konum seçin!',
             });
+            return;
+        }
+
+        let routeUrl = "https://www.google.com/maps/dir/?api=1";
+        routeUrl += `&origin=${selectedLocations[0].lat},${selectedLocations[0].lng}`;
+        routeUrl += `&destination=${selectedLocations[selectedLocations.length - 1].lat},${selectedLocations[selectedLocations.length - 1].lng}`;
+
+        if (selectedLocations.length > 2) {
+            const waypoints = selectedLocations.slice(1, -1).map(loc => `${loc.lat},${loc.lng}`).join('|');
+            routeUrl += `&waypoints=${waypoints}`;
+        }
+
+        window.open(routeUrl, '_blank');
+        selectedLocations = []; // Clear selected stops
+
+        Swal.fire({
+            icon: 'info',
+            title: 'Duraklar Sıfırlandı',
+            text: 'Seçili duraklar sıfırlandı. Yeni durakları seçebilirsiniz.',
+            timer: 1500,
+            showConfirmButton: false
         });
     });
-</script> *@
+
+    // Reset selected locations
+    $('#resetLocations').on('click', function () {
+        selectedLocations = [];
+        Swal.fire({
+            icon: 'info',
+            title: 'Seçimler Sıfırlandı',
+            text: 'Tüm seçimler sıfırlandı.',
+            timer: 1500,
+            showConfirmButton: false
+        });
+    });
+</script>
 
 <style>
     .container {
@@ -168,4 +169,10 @@
         .card:hover {
             box-shadow: 0 8px 16px rgba(0,0,0,0.3);
         }
+
+    #map {
+        height: 600px;
+        width: 100%;
+        margin-top: 20px;
+    }
 </style>
