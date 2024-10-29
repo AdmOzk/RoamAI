@@ -38,14 +38,17 @@ namespace RoamAI.Controllers
             var userId = user.Id;
             var trip = await _db.Trips
                .Include(t => t.Locations)
-               .FirstOrDefaultAsync(x => x.IdentityUserId == userId && x.IsDone == false);
+               .FirstOrDefaultAsync(x => x.IdentityUserId == userId && x.IsDone == false && x.IsConfirmed == true);
 
             return View(trip);
         }
 
-        public async Task<ActionResult> TripDetail(int tripId)
+        public async Task<ActionResult> TripDetail(int id)
         {
-            var trip = await _db.Trips.Where(x => x.Id == tripId && x.IsDone == true).ToListAsync();
+            var trip = await _db.Trips
+                .Include(t => t.Locations)
+                .FirstOrDefaultAsync(x => x.Id == id);
+            
             return View(trip);
         }
 
@@ -95,15 +98,31 @@ namespace RoamAI.Controllers
             return RedirectToAction("MyTrips", "Trip");
         }
 
-        public async Task changeDoneTripStatus(int tripId)
+        public async Task<ActionResult> changeDoneTripStatus(int id)
         {
-            var trip = await _db.Trips.FirstOrDefaultAsync(x => x.Id == tripId);
+            var trip = await _db.Trips.FirstOrDefaultAsync(x => x.Id == id);
 
             if (trip != null)
             {
                 trip.IsDone = true;
                 await _db.SaveChangesAsync();
             }
+
+            return RedirectToAction("MyTrips");
+        }
+
+
+        public async Task<ActionResult> confirm(int id)
+        {
+            var trip = await _db.Trips.FirstOrDefaultAsync(x => x.Id == id);
+
+            if (trip != null)
+            {
+                trip.IsConfirmed = true;
+                await _db.SaveChangesAsync();
+            }
+
+            return RedirectToAction("CurrentTrip");
         }
 
         public async Task<ActionResult> Delete(int id)
@@ -121,7 +140,7 @@ namespace RoamAI.Controllers
 
         public async Task<List<Trip>> getTripsByUserIdAsync(string id)
         {
-            return await _db.Trips.Where(x => x.IdentityUserId == id).ToListAsync();
+            return await _db.Trips.Where(x => x.IdentityUserId == id && x.IsDeleted == false && x.IsConfirmed==true).ToListAsync();
         }
 
         [HttpPost]
@@ -155,14 +174,13 @@ namespace RoamAI.Controllers
                 IdentityUser = user,
                 IdentityUserId = user.Id
             };
-
+            
             _db.Trips.Add(tripModel);
             await _db.SaveChangesAsync();
 
             // Verileri ViewBag ile geç
-            ViewBag.Locations = locations;
-            ViewBag.CityInfo = cityInformation;
-            ViewBag.TripId = tripModel.Id;
+            
+            
 
             return RedirectToAction("RecommendationResult", new { tripId = tripModel.Id });
         }
@@ -181,9 +199,7 @@ namespace RoamAI.Controllers
                 return NotFound();
             }
 
-            // Görünümde kullanılacak model ve ViewBag verileri
-            ViewBag.Locations = trip.Locations;
-            ViewBag.TripId = tripId;
+            
 
             return View(trip);
         }

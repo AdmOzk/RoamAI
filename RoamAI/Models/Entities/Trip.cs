@@ -34,7 +34,8 @@ namespace RoamAI.Models.Entities
 
         public string? IdentityUserId { get; set; }
 
-        
+        public bool IsConfirmed { get; set; } = false;
+
         [ForeignKey("IdentityUserId")]
         public virtual IdentityUser? IdentityUser { get; set; }
 

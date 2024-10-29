@@ -35,6 +35,8 @@ namespace RoamAI.Services
         public async Task<ClaudeResponseModel> GetTravelRecommendations(string country, string city, DateTime StartDate,DateTime EndDate, int culturalPercentage, int EntertainmantPercentage, int foodPercentage)
         {
 
+            locationCoordinates.Clear();
+
             ClaudeResponseModel cresponse = new ClaudeResponseModel();
             // Prompt
            var systemPrompt = $"Ülke-şehir-gideceği tarih: {country}-{city}-{StartDate}-{EndDate}, gezi türü yüzdesi: %Kültürel: {culturalPercentage}, %Eğlence: {EntertainmantPercentage}, %Yemek: {foodPercentage}. " +
@@ -130,7 +132,7 @@ namespace RoamAI.Services
 
                             Dictionary<string, string> LocationsAndCoordinates = new Dictionary<string, string>();
                             
-                            
+                            LocationsAndCoordinates.Clear();
                             
                             foreach (var entry in locationCoordinates)
                             {
@@ -141,6 +143,7 @@ namespace RoamAI.Services
 
                             cresponse.LocationCoordinates = LocationsAndCoordinates;
                             cresponse.text = fullText;
+                            
                             
                             return cresponse;
                         }

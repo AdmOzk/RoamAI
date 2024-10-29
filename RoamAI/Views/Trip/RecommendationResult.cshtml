@@ -1,12 +1,18 @@
 ﻿@using RoamAI.Models.Entities
+@model Trip
 
 <div class="container">
+
+   
     <h2 class="text-primary">Seyahat Planı: @Model.City, @Model.Country</h2>
     <p>Bu seyahat planı başarıyla kaydedildi. <strong>Plan ID:</strong> @ViewBag.TripId</p>
 
+    <a class="btn btn-sm btn-success" asp-controller="Trip" asp-action="confirm" asp-route-id="@Model.Id">Onayla</a>
+    <a class="btn btn-sm btn-danger" asp-controller="Trip" asp-action="createTrip" asp-route-id="@Model.Id" onclick="return confirm('Yeni Seyahat Oluşturmak istediğinize emin misiniz?')">Yeni Seyahat Oluştur</a>
+
     <h4 class="mt-4">Gezilecek Yerler</h4>
     <div class="row">
-        @foreach (var location in ViewBag.Locations as List<RoamAI.Models.Entities.Location>)
+        @foreach (var location in Model.Locations)
         {
             <div class="col-md-4">
                 <div class="card mb-3">
@@ -32,7 +38,7 @@
 <!-- Google Maps API Key -->
 <script src="https://maps.googleapis.com/maps/api/js?key=KEYBURADA" async defer></script>
 
-<script>
+@* <script>
     $(document).ready(function () {
         // ViewBag'den JSON stringini alıp parse ediyoruz
         var locationsData = '@Html.Raw(ViewBag.LocationCoordinates)';
@@ -146,7 +152,7 @@
             });
         });
     });
-</script>
+</script> *@
 
 <style>
     .container {
