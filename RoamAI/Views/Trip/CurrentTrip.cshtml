@@ -1,40 +1,29 @@
 ﻿@using RoamAI.Models.Entities
+@using System.Text.Json
 @model Trip
 
 <div class="container">
-
-
-@if (Model != null){
-    
+    @if (Model != null)
+    {
         <div class="row mt-3">
-
-            <p class="h1 ms-3 mb-3 border-bottom border-success">@Model.Country -  @Model.City</p>
-
+            <p class="h1 ms-3 mb-3 border-bottom border-success">@Model.Country - @Model.City</p>
             <div class="col-6 col-sm-5">
-
-
-
                 <ul class="list-unstyled fs-5 mt-3">
-
                     <li class="mt-2"><b>Gidiş Tarihi:</b> @Model.StartDate</li>
                     <li class="mt-2"><b>Dönüş Tarihi:</b> @Model.EndDate</li>
                     <li class="mt-2"><b>Kalınacak Gün Sayısı:</b> @Model.DayCountToStay</li>
                     <li class="mt-2"><b>Gezi İçeriği:</b>%@Model.CulturalPercentage Kültürel, %@Model.EntertainmantPercentage Eğlence, %@Model.FoodPercentage Gastrolojik</li>
                     <li class="mt-2"><b>Şehir Açıklaması:</b> @Model.Description</li>
-                    
-
                 </ul>
-
                 <div class="mb-3 mt-3">
-
                     <h5>Lokasyonlar</h5>
                     @if (Model.Locations != null && Model.Locations.Any())
                     {
-                        @foreach (var Location in Model.Locations)
+                        @foreach (var location in Model.Locations)
                         {
                             <div class="mt-2 p-2 border-success border rounded">
-                                <h5 class="border-bottom">@Location.LocationName</h5>
-                                <p>@Location.Coordinates</p>
+                                <h5 class="border-bottom">@location.LocationName</h5>
+                                <p>@location.Coordinates</p>
                             </div>
                         }
                     }
@@ -43,19 +32,145 @@
                         <p>No locations available for this trip.</p>
                     }
                 </div>
-
-                
-
                 <li class="mt-2 border-bottom pb-3"><a class="btn btn-sm btn-danger" asp-controller="Trip" asp-action="changeDoneTripStatus" asp-route-id="@Model.Id">Seyahati Bitir</a></li>
-
             </div>
+            <h2>Location Map</h2>
 
-            </div>
-}
 
-else{
-    <p>güncel seyahatiniz bulunamadı </p>
-    <a class="nav-link text-dark" asp-area="" asp-controller="Trip" asp-action="CreateTrip">Seyahat Oluştur</a>
-}
+            <button id="createMultiStopRoute" class="btn btn-primary mt-3">Çoklu Duraklı Rota Oluştur</button>
+            <button id="resetLocations" class="btn btn-secondary mt-3">Seçimleri Sıfırla</button>
 
+            <div id="map"></div>
+
+
+        </div>
+
+        <!-- Include SweetAlert2 for notifications -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB0w9MsYHLJdx_Wd-LOpP8ZgHGsy5mQXh4&callback=initMap" async defer></script>
+
+        <script>
+            let selectedLocations = []; // Array to store selected locations
+
+            function initMap() {
+                const mapOptions = {
+                    zoom: 10,
+                    center: { lat: 39.925533, lng: 32.866287 } // Default location (e.g., Ankara, Turkey)
+                };
+
+                const map = new google.maps.Map(document.getElementById("map"), mapOptions);
+
+                // Directly get locations from the Model
+                const locations = @Html.Raw(JsonSerializer.Serialize(Model.Locations.Select(loc => new { loc.LocationName, loc.Coordinates })));
+
+                locations.forEach(location => {
+                    const [name, coordString] = [location.LocationName, location.Coordinates];
+                    const coords = parseCoordinates(coordString);
+
+                    if (coords) {
+                        const marker = new google.maps.Marker({
+                            position: coords,
+                            map: map,
+                            title: name
+                        });
+
+                        const infoContent = `<b>${name}</b><br>
+                                    <button onclick="addLocation(${coords.lat}, ${coords.lng}, '${name}')">Bu konumu rota duraklarına ekle</button><br>
+                                    <a href="https://www.google.com/maps/dir/?api=1&destination=${coords.lat},${coords.lng}" target="_blank">Tek Rota Oluştur</a>`;
+                        const infoWindow = new google.maps.InfoWindow({ content: infoContent });
+
+                        marker.addListener("click", () => infoWindow.open(map, marker));
+                    }
+                });
+            }
+
+            function parseCoordinates(coordinateString) {
+                const regex = /([-+]?\d*\.\d+|\d+)[°]\s*([NS]),\s*([-+]?\d*\.\d+|\d+)[°]\s*([EW])/;
+                const match = coordinateString.match(regex);
+
+                if (!match) return null;
+
+                let lat = parseFloat(match[1]);
+                let lng = parseFloat(match[3]);
+
+                if (match[2] === "S") lat = -lat;
+                if (match[4] === "W") lng = -lng;
+
+                return { lat, lng };
+            }
+
+            // Add location to the route
+            window.addLocation = function (lat, lng, key) {
+                selectedLocations.push({ lat, lng, name: key });
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Durak Eklendi',
+                    text: `${key} rota duraklarına eklendi!`,
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            };
+
+            // Create multi-stop route
+            $('#createMultiStopRoute').on('click', function () {
+                if (selectedLocations.length === 0) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Uyarı',
+                        text: 'Rota oluşturmak için en az bir konum seçin!',
+                    });
+                    return;
+                }
+
+                let routeUrl = "https://www.google.com/maps/dir/?api=1";
+                routeUrl += `&origin=${selectedLocations[0].lat},${selectedLocations[0].lng}`;
+                routeUrl += `&destination=${selectedLocations[selectedLocations.length - 1].lat},${selectedLocations[selectedLocations.length - 1].lng}`;
+
+                if (selectedLocations.length > 2) {
+                    const waypoints = selectedLocations.slice(1, -1).map(loc => `${loc.lat},${loc.lng}`).join('|');
+                    routeUrl += `&waypoints=${waypoints}`;
+                }
+
+                window.open(routeUrl, '_blank');
+                selectedLocations = []; // Clear selected stops
+
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Duraklar Sıfırlandı',
+                    text: 'Seçili duraklar sıfırlandı. Yeni durakları seçebilirsiniz.',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            });
+
+            // Reset selected locations
+            $('#resetLocations').on('click', function () {
+                selectedLocations = [];
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Seçimler Sıfırlandı',
+                    text: 'Tüm seçimler sıfırlandı.',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            });
+        </script>
+
+    }
+    else
+    {
+        <p>Güncel seyahatiniz bulunamadı</p>
+        <a class="nav-link text-dark" asp-area="" asp-controller="Trip" asp-action="CreateTrip">Seyahat Oluştur</a>
+    }
 </div>
+
+
+
+<style>
+    #map {
+        height: 600px;
+        width: 100%;
+        margin-top: 20px;
+    }
+</style>
