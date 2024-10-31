@@ -122,6 +122,20 @@
 
 </style>
 
+
+@if (ViewBag.HasActiveTrip != null && ViewBag.HasActiveTrip == true)
+{
+    <!-- Aktif gezi varsa yalnızca uyarı mesajı görüntüleyin -->
+    <div class="travel-plan-card">
+        <h2>Mevcut Seyahatiniz Var</h2>
+        <p>Yeni bir seyahat planı oluşturmadan önce mevcut seyahatinizi bitirmeniz gerekiyor.</p>
+        <a class="btn btn-primary" href="@Url.Action("CurrentTrip", "Trip")">Mevcut Seyahati Görüntüle</a>
+    </div>
+}
+
+else {
+
+
 <div class="travel-plan-card">
     <div class="header">
         <h2>Travel Planı Oluştur</h2>
@@ -209,6 +223,7 @@
     <p>Bu seyahat planı başarıyla kaydedildi. <strong>Trip ID:</strong> <span id="tripId"></span></p>
 </div>
 
+}
 <!-- Choices.js CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
 

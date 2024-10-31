@@ -76,6 +76,24 @@ namespace RoamAI.Controllers
         // GET: TripController/Create
         public async Task<ActionResult> CreateTrip()
         {
+            var user = await _userManager.GetUserAsync(User);
+            var userId = user.Id;
+
+            // Check if there's an active trip for the user
+            var existingTrip = await _db.Trips
+                .FirstOrDefaultAsync(x => x.IdentityUserId == userId && x.IsDone == false && x.IsConfirmed == true);
+
+            if (existingTrip != null)
+            {
+                // If there’s an active trip, set ViewBag flag
+                ViewBag.HasActiveTrip = true;
+                ViewBag.CurrentTripId = existingTrip.Id; // Optional: if you need the trip ID
+            }
+            else
+            {
+                ViewBag.HasActiveTrip = false;
+            }
+
             return View();
         }
 
