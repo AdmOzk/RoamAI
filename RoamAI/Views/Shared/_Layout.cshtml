@@ -80,21 +80,24 @@
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="btn btn-outline-primary nav-link mx-1" asp-area="" asp-controller="Trip" asp-action="CurrentTrip" style="color: white;">
-                                Güncel Seyahatim
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="btn btn-outline-primary nav-link mx-1" asp-area="" asp-controller="Trip" asp-action="MyTrips" style="color: white;">
-                                Seyahatlerim
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="btn btn-outline-primary nav-link mx-1" asp-area="" asp-controller="Trip" asp-action="CreateTrip" style="color: white;">
-                                Seyahat Oluştur
-                            </a>
-                        </li>
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <li class="nav-item">
+                                <a class="btn btn-outline-primary nav-link mx-1" asp-area="" asp-controller="Trip" asp-action="CurrentTrip" style="color: white;">
+                                    Güncel Seyahatim
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="btn btn-outline-primary nav-link mx-1" asp-area="" asp-controller="Trip" asp-action="MyTrips" style="color: white;">
+                                    Seyahatlerim
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="btn btn-outline-primary nav-link mx-1" asp-area="" asp-controller="Trip" asp-action="CreateTrip" style="color: white;">
+                                    Seyahat Oluştur
+                                </a>
+                            </li>
+                        }
                     </ul>
 
                     <!-- _LoginPartial.cshtml burada çağrılıyor -->
