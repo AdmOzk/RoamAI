@@ -82,8 +82,8 @@
                             <td>@trip.StartDate.ToString("dd-MM-yyyy")</td>
                             <td>@trip.EndDate.ToString("dd-MM-yyyy")</td>
                             <td>
-                                <a class="btn btn-sm btn-warning" asp-controller="Trip" asp-action="TripDetail" asp-route-id="@trip.Id">Detay</a>
-                                <a class="btn btn-sm btn-danger" asp-controller="Trip" asp-action="Delete" asp-route-id="@trip.Id" onclick="return confirm('Bu kaydı silmek istediğinize emin misiniz?')">Sil</a>
+                                <a class="btn btn-sm btn-outline-warning" asp-controller="Trip" asp-action="TripDetail" asp-route-id="@trip.Id" style="width:30%; font-weight:bold;">Detay</a>
+                                <a class="btn btn-sm btn-outline-danger" asp-controller="Trip" asp-action="Delete" asp-route-id="@trip.Id" onclick="return confirm('Bu kaydı silmek istediğinize emin misiniz?')" style="width:30%; font-weight:bold;">Sil</a>
                             </td>
                         </tr>
                     }

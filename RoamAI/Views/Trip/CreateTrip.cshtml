@@ -1,41 +1,176 @@
 ﻿@using RoamAI.Models.Entities
 @model Trip
 
-<div>
-    <h2>Travel Planı Oluştur</h2>
+<style>
+    body {
+        background-image: url('/images/travel6.png');
+        background-size: cover;
+        background-position: center;
+        font-family: Arial, sans-serif;
+        color: #333;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        min-height: 100vh;
+    }
+    .date-group {
+    
+    margin: 15px;
+    }
+
+
+    .travel-plan-card {
+        background-color: rgba(255, 255, 255, 0.9);
+        border-radius: 15px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        padding: 20px;
+        width: 700px;
+        text-align: center;
+        margin-top: 100px;
+    }
+
+    .slider-group {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        width: 100%;
+        margin-top: 30px;
+    }
+
+        .slider-group label {
+            font-weight: bold;
+            text-align: left;
+            flex-basis: 40%;
+        }
+
+        .slider-group input[type="range"] {
+            flex: 1;
+            -webkit-appearance: none;
+            height: 6px;
+            background: #ddd;
+            outline: none;
+            opacity: 0.9;
+            transition: opacity .2s;
+            border-radius: 4px;
+        }
+
+            .slider-group input[type="range"]::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                appearance: none;
+                width: 15px;
+                height: 15px;
+                background: #007bff;
+                cursor: pointer;
+                border-radius: 50%;
+            }
+
+            .slider-group input[type="range"]::-moz-range-thumb {
+                width: 15px;
+                height: 15px;
+                background: #007bff;
+                cursor: pointer;
+                border-radius: 50%;
+            }
+
+    .slider-value {
+        width: 40px;
+        text-align: right;
+    }
+
+    #submitBtn {
+        background-color: #007bff;
+        color: white;
+        border: 2px solid #007bff;
+        cursor: pointer;
+        transition: background-color 0.3s ease, border 0.3s ease;
+        margin: 0 auto;
+        width: 50%;
+        padding: 15px;
+        font-size: 1.1rem;
+        display: block;
+        border-radius: 8px;
+        margin-top: 30px;
+    }
+
+    #submitBtn:hover {
+        background-color: #0056b3;
+        border-color: #0056b3;
+    }
+
+    .header {
+        background-color: rgba(0, 0, 0, 0.1);
+        color: #333;
+        padding: 10px 0;
+        margin-bottom: 20px;
+        border-radius: 8px;
+        font-weight: bold;
+        width: 100%;
+    }
+    
+    .travel-plan-card h2 {
+        margin: 10px;
+    }
+    #city,#country{
+        width:300px;
+    }
+    .form-group{
+        margin:10px;
+    }
+
+
+</style>
+
+<div class="travel-plan-card">
+    <div class="header">
+        <h2>Travel Planı Oluştur</h2>
+    </div>
     <form method="post" asp-action="GetRecommendations" asp-controller="Trip">
-        <label>Ülke: </label>
-        <select id="country" name="Country" asp-for="Country" class="choices" required>
-            <option value="">Select Country</option>
-        </select>
-        <br />
+        <div class="form-group row mb-3">
+            <label class="col-sm-3 col-form-label">Ülke:</label>
+            <div class="col-sm-9">
+                <select id="country" name="Country" asp-for="Country" class="choices" required>
+                    <option value="">Select Country</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group row mb-3">
+            <label class="col-sm-3 col-form-label">Şehir:</label>
+            <div class="col-sm-9">
+                <select id="city" name="City" asp-for="City" required>
+                    <option value="">Select City</option>
+                </select>
+            </div>
+        </div>
+        <div class="date-group">
+            <div class="form-group">
+                <label>Gidiş: </label>
+                <input type="date" name="StartDate" asp-for="StartDate" required />
+            </div>
+            <div class="form-group">
+                <label>Dönüş: </label>
+                <input type="date" name="EndDate" asp-for="EndDate" required />
+            </div>
+        </div>
+        <div class="slider-group">
+            <label>Kültürel Gezi:</label>
+            <input type="range" name="CulturalPercentage" asp-for="CulturalPercentage" min="0" max="100" value="40" step="10" oninput="document.getElementById('culturalValue').textContent = this.value + '%'">
+            <span id="culturalValue" class="slider-value">40%</span>
+        </div>
 
-        <label>Şehir: </label>
-        <select id="city" name="City" asp-for="City" required>
-            <option value="">Select City</option>
-        </select>
-        <br />
+        <div class="slider-group">
+            <label>Modern Gezi:</label>
+            <input type="range" name="EntertainmantPercentage" asp-for="EntertainmantPercentage" min="0" max="100" value="30" step="10" oninput="document.getElementById('entertainmentValue').textContent = this.value + '%'">
+            <span id="entertainmentValue" class="slider-value">30%</span>
+        </div>
 
-        <label>Gideceğiniz Tarih: </label>
-        <input type="date" name="StartDate" asp-for="StartDate" required />
-        <br />
-
-        <label>Döneceğiniz Tarih: </label>
-        <input type="date" name="EndDate" asp-for="EndDate" required />
-        <br />
-
-        <label>Kültürel Gezi Yüzdesi: </label>
-        <input type="number" name="CulturalPercentage" asp-for="CulturalPercentage" required min="0" max="100" value="40" />
-        <br />
-
-        <label>Modern Gezi Yüzdesi: </label>
-        <input type="number" name="EntertainmantPercentage" asp-for="EntertainmantPercentage" required min="0" max="100" value="30" />
-        <br />
-
-        <label>Yemek Üzerine Gezi Yüzdesi: </label>
-        <input type="number" name="FoodPercentage" asp-for="FoodPercentage" required min="0" max="100" value="30" />
-        <br />
-
+        <div class="slider-group">
+            <label>Yemek Üzerine Gezi:</label>
+            <input type="range" name="FoodPercentage" asp-for="FoodPercentage" min="0" max="100" value="30" step="10" oninput="document.getElementById('foodValue').textContent = this.value + '%'">
+            <span id="foodValue" class="slider-value">30%</span>
+        </div>
+        
         <button type="submit" id="submitBtn">Plan Oluştur</button>
     </form>
 

@@ -2,63 +2,95 @@
 @using System.Text.Json
 @model Trip
 
-<div class="container">
+<div class="container" style="margin: 100px auto; max-width: 75%; background-color: rgba(255, 255, 255, 0.8); padding: 20px; border-radius: 10px;">
 
-
-        <div class="row mt-3">
+        <div class="row mt-3  text-center">
 
             <p class="h1 ms-3 mb-3 border-bottom border-success">@Model.Country -  @Model.City</p>
-
-            <div class="col-6 col-sm-5">
-
-
-
-                <ul class="list-unstyled fs-5 mt-3">
-
-                    <li class="mt-2"><b>Gidiş Tarihi:</b> @Model.StartDate</li>
-                    <li class="mt-2"><b>Dönüş Tarihi:</b> @Model.EndDate</li>
-                    <li class="mt-2"><b>Kalınacak Gün Sayısı:</b> @Model.DayCountToStay</li>
-                    <li class="mt-2"><b>Gezi İçeriği:</b>%@Model.CulturalPercentage Kültürel, %@Model.EntertainmantPercentage Eğlence, %@Model.FoodPercentage Gastrolojik</li>
-                    <li class="mt-2"><b>Şehir Açıklaması:</b> @Model.Description</li>
-                    
-
-                </ul>
-
-                <div class="mb-3 mt-3">
-
-                    <h5>Lokasyonlar</h5>
-                    @foreach (var Location in Model.Locations)
-                    {
-                        <div class="mt-2 p-2 border-success border rounded">
-
-                            <h5 class="border-bottom">@Location.LocationName</h5>
-
-                            <p>@Location.Coordinates</p>
-
-
-
-
-                        </div>
-
-                    }
+            <div class="col-md-3 mb-3" style="width: 20%;">
+                <div class="card text-center" style="background-color: rgba(255, 255, 255, 0.9); ">
+                    <div class="card-header"><b>Gidiş Tarihi</b></div>
+                    <div class="card-body" style="height:40px; padding:5px;">
+                        <p>@Model.StartDate.ToString("dd-MM-yyyy")</p>
+                    </div>
                 </div>
-
-                
-
+            </div>
+            <div class="col-md-3 mb-3" style="width: 20%;">
+                <div class="card text-center" style="background-color: rgba(255, 255, 255, 0.9);">
+                    <div class="card-header"><b>Dönüş Tarihi</b></div>
+                    <div class="card-body" style="height:40px; padding:5px;">
+                        <p>@Model.EndDate.ToString("dd-MM-yyyy")</p>
+                    </div>
+                </div>
             </div>
 
+            <div class="col-md-3 mb-3" style="width: 20%;">
+                <div class="card text-center" style="background-color: rgba(255, 255, 255, 0.9);">
+                    <div class="card-header"><b>Kalınacak Gün Sayısı</b></div>
+                    <div class="card-body" style="height:40px; padding:5px;">
+                        <p>@Model.DayCountToStay Gün</p>
+                    </div>
+                </div>
+            </div>
 
-        <h2>Location Map</h2>
+            <div class="col-md-3 mb-3" style="width: 40%;">
+                <div class="card text-center" style="background-color: rgba(255, 255, 255, 0.9);">
+                    <div class="card-header"><b>Gezi İçeriği</b></div>
+                    <div class="card-body" style="height:40px; padding:5px;">
+                        <p>%@Model.CulturalPercentage Kültürel, %@Model.EntertainmantPercentage Eğlence, %@Model.FoodPercentage Gastrolojik</p>
+                    </div>
+                </div>
+            </div>
 
-        <button id="createMultiStopRoute" class="btn btn-primary mt-3">Çoklu Duraklı Rota Oluştur</button>
-        <button id="resetLocations" class="btn btn-secondary mt-3">Seçimleri Sıfırla</button>
+            <div class="col-12 mb-4">
+                <div class="card text-center" style="background-color: rgba(255, 255, 255, 0.9);">
+                    <div class="card-header"><h4 style="margin:10px;">Şehir Açıklaması</h4></div>
+                    <div class="card-body">
+                        <p style="font-size: 23px;">@Model.Description</p>
 
-        <div id="map"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12">
+                <div class="card mb-4" style="background-color: rgba(255, 255, 255, 0.9);">
+                    <div class="card-body">
+                        <h4 class="text-center border-bottom"><strong>Lokasyonlar</strong></h4>
 
+                        <div class="row">    
+                                @foreach (var location in Model.Locations)
+                                {
+                                    <div class="col-md-6 mt-2">
+                                        <div class="p-2 border-success border rounded text-center">
+                                            <h5 class="border-bottom">@location.LocationName</h5>
+                                            <p>@location.Coordinates</p>
+                                        </div>
+                                    </div>
+                                }                           
+                        </div>
+                    </div>
+                </div>
+            </div> 
+           
+            <div class="col-12" style="margin-top:30px;">
+                <div class="card mb-4" style="background-color: rgba(255, 255, 255, 0.9);">
+                    <div class="card-header">
+                        <h2 class="text-center card-title">
+                            Location Map
+                        </h2>
+                    </div>
 
+                    <div class="card-body">
+
+                        <div id="map" style="border-radius: 8px;"></div>
+
+                        <div class="d-flex justify-content-center mt-3">
+                            <button id="createMultiStopRoute" class="btn btn-outline-primary mx-2">Çoklu Duraklı Rota Oluştur</button>
+                            <button id="resetLocations" class="btn btn-outline-secondary mx-2">Seçimleri Sıfırla</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-    
-
 </div>
 
 
@@ -191,10 +223,20 @@
 </script>
 
 <style>
+    body {
+        background-image: url('/images/travel7.png');
+        background-size: cover;
+        background-attachment: fixed;
+    }
+
     #map {
         height: 600px;
         width: 100%;
         margin-top: 20px;
+    }
+
+    .card {
+        background-color: rgba(255, 255, 255, 0.8);
     }
 </style>
 

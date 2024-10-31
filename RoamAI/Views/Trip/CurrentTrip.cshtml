@@ -2,49 +2,110 @@
 @using System.Text.Json
 @model Trip
 
-<div class="container">
+<div class="container" style="margin: 100px auto; max-width: 75%; background-color: rgba(255, 255, 255, 0.8); padding: 20px; border-radius: 10px;">
+
     @if (Model != null)
     {
-        <div class="row mt-3">
+        <div class="row mt-3 text-center">
             <p class="h1 ms-3 mb-3 border-bottom border-success">@Model.Country - @Model.City</p>
-            <div class="col-6 col-sm-5">
-                <ul class="list-unstyled fs-5 mt-3">
-                    <li class="mt-2"><b>Gidiş Tarihi:</b> @Model.StartDate</li>
-                    <li class="mt-2"><b>Dönüş Tarihi:</b> @Model.EndDate</li>
-                    <li class="mt-2"><b>Kalınacak Gün Sayısı:</b> @Model.DayCountToStay</li>
-                    <li class="mt-2"><b>Gezi İçeriği:</b>%@Model.CulturalPercentage Kültürel, %@Model.EntertainmantPercentage Eğlence, %@Model.FoodPercentage Gastrolojik</li>
-                    <li class="mt-2"><b>Şehir Açıklaması:</b> @Model.Description</li>
-                </ul>
-                <div class="mb-3 mt-3">
-                    <h5>Lokasyonlar</h5>
-                    @if (Model.Locations != null && Model.Locations.Any())
-                    {
-                        @foreach (var location in Model.Locations)
-                        {
-                            <div class="mt-2 p-2 border-success border rounded">
-                                <h5 class="border-bottom">@location.LocationName</h5>
-                                <p>@location.Coordinates</p>
-                            </div>
-                        }
-                    }
-                    else
-                    {
-                        <p>No locations available for this trip.</p>
-                    }
+
+            <div class="col-md-3 mb-3" style="width: 20%;">
+                <div class="card text-center" style="background-color: rgba(255, 255, 255, 0.9); ">
+                    <div class="card-header"><b>Gidiş Tarihi</b></div>
+                    <div class="card-body" style="height:40px; padding:5px;">
+                        <p>@Model.StartDate.ToString("dd-MM-yyyy")</p>
+                    </div>
                 </div>
-                <li class="mt-2 border-bottom pb-3"><a class="btn btn-sm btn-danger" asp-controller="Trip" asp-action="changeDoneTripStatus" asp-route-id="@Model.Id">Seyahati Bitir</a></li>
             </div>
-            <h2>Location Map</h2>
 
+            <div class="col-md-3 mb-3" style="width: 20%;">
+                <div class="card text-center" style="background-color: rgba(255, 255, 255, 0.9);">
+                    <div class="card-header"><b>Dönüş Tarihi</b></div>
+                    <div class="card-body" style="height:40px; padding:5px;">
+                        <p>@Model.EndDate.ToString("dd-MM-yyyy")</p>
+                    </div>
+                </div>
+            </div>
 
-            <button id="createMultiStopRoute" class="btn btn-primary mt-3">Çoklu Duraklı Rota Oluştur</button>
-            <button id="resetLocations" class="btn btn-secondary mt-3">Seçimleri Sıfırla</button>
+            <div class="col-md-3 mb-3" style="width: 20%;">
+                <div class="card text-center" style="background-color: rgba(255, 255, 255, 0.9);">
+                    <div class="card-header"><b>Kalınacak Gün Sayısı</b></div>
+                    <div class="card-body" style="height:40px; padding:5px;">
+                        <p>@Model.DayCountToStay Gün</p>
+                    </div>
+                </div>
+            </div>
 
-            <div id="map"></div>
+            <div class="col-md-3 mb-3" style="width: 40%;">
+                <div class="card text-center" style="background-color: rgba(255, 255, 255, 0.9);">
+                    <div class="card-header"><b>Gezi İçeriği</b></div>
+                    <div class="card-body" style="height:40px; padding:5px;">
+                        <p>%@Model.CulturalPercentage Kültürel, %@Model.EntertainmantPercentage Eğlence, %@Model.FoodPercentage Gastrolojik</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 mb-4">
+                <div class="card text-center" style="background-color: rgba(255, 255, 255, 0.9);">
+                    <div class="card-header"><h4 style="margin:10px;">Şehir Açıklaması</h4></div>
+                    <div class="card-body">
+                        <p style="font-size: 23px;">@Model.Description</p>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12">
+                <div class="card mb-4" style="background-color: rgba(255, 255, 255, 0.9);">
+                    <div class="card-body">
+                        <h4 class="text-center border-bottom"><strong>Lokasyonlar</strong></h4>
+
+                        <div class="row">
+                            @if (Model.Locations != null && Model.Locations.Any())
+                            {
+                                @foreach (var location in Model.Locations)
+                                {
+                                    <div class="col-md-6 mt-2">
+                                        <div class="p-2 border-success border rounded text-center">
+                                            <h5 class="border-bottom">@location.LocationName</h5>
+                                            <p>@location.Coordinates</p>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <p class="text-center">No locations available for this trip.</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center">
+                <a class="btn btn-sm btn-danger" asp-controller="Trip" asp-action="changeDoneTripStatus" asp-route-id="@Model.Id" style="width:25%; font-size:20px;">Seyahati Bitir</a>
+            </div>
+            <div class="col-12" style="margin-top:30px;">
+                <div class="card mb-4" style="background-color: rgba(255, 255, 255, 0.9);">
+                    <div class="card-header">
+                        <h2 class="text-center card-title">
+                            Location Map
+                        </h2>
+                    </div>
+
+                    <div class="card-body">
+
+                        <div id="map" style="border-radius: 8px;"></div>
+
+                        <div class="d-flex justify-content-center mt-3">
+                            <button id="createMultiStopRoute" class="btn btn-outline-primary mx-2">Çoklu Duraklı Rota Oluştur</button>
+                            <button id="resetLocations" class="btn btn-outline-secondary mx-2">Seçimleri Sıfırla</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
 
         </div>
-
         <!-- Include SweetAlert2 for notifications -->
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -76,8 +137,8 @@
                         });
 
                         const infoContent = `<b>${name}</b><br>
-                                    <button onclick="addLocation(${coords.lat}, ${coords.lng}, '${name}')">Bu konumu rota duraklarına ekle</button><br>
-                                    <a href="https://www.google.com/maps/dir/?api=1&destination=${coords.lat},${coords.lng}" target="_blank">Tek Rota Oluştur</a>`;
+                                                    <button onclick="addLocation(${coords.lat}, ${coords.lng}, '${name}')">Bu konumu rota duraklarına ekle</button><br>
+                                                    <a href="https://www.google.com/maps/dir/?api=1&destination=${coords.lat},${coords.lng}" target="_blank">Tek Rota Oluştur</a>`;
                         const infoWindow = new google.maps.InfoWindow({ content: infoContent });
 
                         marker.addListener("click", () => infoWindow.open(map, marker));
@@ -160,17 +221,28 @@
     }
     else
     {
-        <p>Güncel seyahatiniz bulunamadı</p>
-        <a class="nav-link text-dark" asp-area="" asp-controller="Trip" asp-action="CreateTrip">Seyahat Oluştur</a>
+        <div class="text-center">
+            <p style="font-size:24px; font-weight:bold">Güncel seyahatiniz bulunamadı</p>
+            <a class="btn btn-outline-primary" asp-area="" asp-controller="Trip" asp-action="CreateTrip" style="border-width: 2px; border-color:black;">Yeni Bir Seyahat Oluştur</a>
+        </div>
+       
     }
 </div>
 
-
-
 <style>
+    body {
+        background-image: url('/images/travel8.png');
+        background-size: cover;
+        background-attachment: fixed;
+    }
+
     #map {
         height: 600px;
         width: 100%;
         margin-top: 20px;
+    }
+
+    .card {
+        background-color: rgba(255, 255, 255, 0.8);
     }
 </style>
