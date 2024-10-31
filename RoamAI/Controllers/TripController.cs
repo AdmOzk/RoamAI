@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -32,6 +33,7 @@ namespace RoamAI.Controllers
             return View();
         }
 
+        [Authorize]
         public async Task<ActionResult> CurrentTrip()
         {
             var user = await _userManager.GetUserAsync(User);
@@ -48,6 +50,7 @@ namespace RoamAI.Controllers
             return View(trip);
         }
 
+        [Authorize]
         public async Task<ActionResult> TripDetail(int id)
         {
             var trip = await _db.Trips
@@ -59,6 +62,7 @@ namespace RoamAI.Controllers
             return View(trip);
         }
 
+        [Authorize]
         public async Task<ActionResult> MyTrips()
         {
             var user = await _userManager.GetUserAsync(User);
@@ -67,12 +71,14 @@ namespace RoamAI.Controllers
             return View(trips);
         }
 
+        [Authorize]
         // GET: TripController/Details/5
         public async Task<ActionResult> Details(int id)
         {
             return View();
         }
 
+        [Authorize]
         // GET: TripController/Create
         public async Task<ActionResult> CreateTrip()
         {
@@ -97,6 +103,8 @@ namespace RoamAI.Controllers
             return View();
         }
 
+
+        [Authorize]
         // POST: TripController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -123,6 +131,7 @@ namespace RoamAI.Controllers
             return RedirectToAction("MyTrips", "Trip");
         }
 
+        [Authorize]
         public async Task<ActionResult> changeDoneTripStatus(int id)
         {
             var trip = await _db.Trips.FirstOrDefaultAsync(x => x.Id == id);
@@ -136,7 +145,7 @@ namespace RoamAI.Controllers
             return RedirectToAction("MyTrips");
         }
 
-
+        [Authorize]
         public async Task<ActionResult> confirm(int id)
         {
             var trip = await _db.Trips.FirstOrDefaultAsync(x => x.Id == id);
@@ -150,6 +159,7 @@ namespace RoamAI.Controllers
             return RedirectToAction("CurrentTrip");
         }
 
+        [Authorize]
         public async Task<ActionResult> Delete(int id)
         {
             var trip = await _db.Trips.FirstOrDefaultAsync(x => x.Id == id);
@@ -163,11 +173,13 @@ namespace RoamAI.Controllers
             return RedirectToAction("MyTrips");
         }
 
+        [Authorize]
         public async Task<List<Trip>> getTripsByUserIdAsync(string id)
         {
             return await _db.Trips.Where(x => x.IdentityUserId == id && x.IsDeleted == false && x.IsConfirmed==true).ToListAsync();
         }
 
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> GetRecommendations(string country, string city, DateTime StartDate, DateTime EndDate, int culturalPercentage, int entertainmantPercentage, int foodPercentage)
         {
@@ -212,6 +224,7 @@ namespace RoamAI.Controllers
             return RedirectToAction("RecommendationResult", new { tripId = tripModel.Id });
         }
 
+        [Authorize]
         [HttpGet]
         [Route("Trip/GetLocations")]
         public string GetLocations(int tripId)
@@ -226,7 +239,7 @@ namespace RoamAI.Controllers
 
 
 
-
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> RecommendationResult(int tripId)
         {
