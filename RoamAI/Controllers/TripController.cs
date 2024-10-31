@@ -184,7 +184,7 @@ namespace RoamAI.Controllers
         public async Task<IActionResult> GetRecommendations(string country, string city, DateTime StartDate, DateTime EndDate, int culturalPercentage, int entertainmantPercentage, int foodPercentage)
         {
             var travelRecommendations = await _claudeService.GetTravelRecommendations(country, city, StartDate, EndDate, culturalPercentage, entertainmantPercentage, foodPercentage);
-            var cityInformation = await _claudeService.GetCityInformation(country, city);
+            var cityInformation = await _claudeService.GetCityInformation(country, city,StartDate,EndDate);
 
             // Konumları hazırla
             var locations = travelRecommendations.LocationCoordinates.Select(location => new Location

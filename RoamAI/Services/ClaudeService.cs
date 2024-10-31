@@ -49,7 +49,7 @@ namespace RoamAI.Services
     $"- Yemek (%{foodPercentage}): Yemek yer önerilerini günün toplam öneri sayısının %{foodPercentage} kadarı olacak şekilde yap.\n" +
     "Her gün için öneri yaparken, her kategoride benzersiz yerler öner ve aynı yeri başka bir günde tekrar etme. Her öneri, belirtilen formatta ('Yer İsmi (Koordinatlar: xx.xxxx°N, xx.xxxx°E)') olmalıdır. " +
    "Günleri kalacağı gün kadar devam ettir. Günlerin tamamını detaylı olarak listele, kısaltma ya da '...' ifadesi kullanma. Kullanıcının belirttiği gün sayısı kadar günü ayrı ayrı detaylandır." +
-    "Belirtilen tarih aralığında ki tüm günleri tek tek kontrol et belirtilen ülkede herhangi resmi tatil günü varsa döndür. Mesela : verdiğin liste de ki günler 28 ekim , 29 ekim 30 ekim burada 29 ekim türkiyede resmi tatildir ona göre 29 ekim var dikkatli olunuz gibi mesaj döndürmen lazım Yoksa en sonda ayrı bir yerde şu mesajı ver: 'Gideceğiniz tarih herhangi bir milli bayrama denk gelmiyor.' Yanıtın her zaman bu formatta olmalı.";
+   "Yanıtın her zaman bu formatta olmalı.";
 
             var input = new
             {
@@ -156,10 +156,93 @@ namespace RoamAI.Services
             }
         }
 
-        public async Task<string> GetCityInformation(string country, string city)
+
+        public async Task<string> GetHolidayInfo(string country, DateTime StartDate, DateTime EndDate)
+        {
+            var holidayList = @"
+    TÜRKİYE: 
+        - Yılbaşı: 1 Ocak
+        - Ulusal Egemenlik ve Çocuk Bayramı: 23 Nisan
+        - Emek ve Dayanışma Günü: 1 Mayıs
+        - Atatürk'ü Anma, Gençlik ve Spor Bayramı: 19 Mayıs
+        - Zafer Bayramı: 30 Ağustos
+        - Cumhuriyet Bayramı: 29 Ekim
+    ABD: 
+        - Yeni Yıl: 1 Ocak
+        - Bağımsızlık Günü: 4 Temmuz
+        - Şükran Günü: Kasım ayının dördüncü perşembesi
+        - Noel: 25 Aralık
+    ALMANYA: 
+        - Yılbaşı: 1 Ocak
+        - İyi Cuma: Tarihi değişken
+        - İşçi Bayramı: 1 Mayıs
+        - Alman Birliği Günü: 3 Ekim
+        - Noel: 25 Aralık
+        - İkinci Noel Günü: 26 Aralık
+    ";
+
+            var systemPrompt = $"Belirtilen {holidayList} tatil listesine göre, {country} için {StartDate:yyyy-MM-dd} ile {EndDate:yyyy-MM-dd} tarihleri arasında resmi bir tatil olup olmadığını kontrol et.\n" +
+                               "Eğer tatil varsa, tatil tarihlerinin yanına ⚠️ 'Olası Yoğunluğa Karşı Dikkatli olunuz' şeklinde bir uyarı ekleyerek belirt. Eğer tatil yoksa, 'Gideceğiniz tarih herhangi bir milli bayrama denk gelmiyor.' mesajını ver. Sadece ilgili tatil için cevap döndür tam listeyi verme.";
+
+            var input = new
+            {
+                system = systemPrompt,
+                messages = new[]
+                {
+            new
+            {
+                role = "user",
+                content = $"Ülke: {country}, Tarihler: {StartDate:yyyy-MM-dd} - {EndDate:yyyy-MM-dd}"
+            }
+        },
+                max_tokens = 1000,
+                temperature = 0.1,
+                top_p = 0.95,
+                top_k = 5,
+                stop_sequences = new string[] { },
+                anthropic_version = "bedrock-2023-05-31"
+            };
+
+            var inputJson = JsonSerializer.Serialize(input);
+
+            var request = new InvokeModelRequest
+            {
+                ModelId = "anthropic.claude-3-sonnet-20240229-v1:0",
+                ContentType = "application/json",
+                Body = new MemoryStream(Encoding.UTF8.GetBytes(inputJson))
+            };
+
+            var response = await _runtimeClient.InvokeModelAsync(request);
+
+            using (var reader = new StreamReader(response.Body))
+            {
+                var responseBody = await reader.ReadToEndAsync();
+                var jsonDocument = JsonDocument.Parse(responseBody);
+                var root = jsonDocument.RootElement;
+
+                if (root.TryGetProperty("content", out var contentArray) && contentArray.ValueKind == JsonValueKind.Array)
+                {
+                    foreach (var content in contentArray.EnumerateArray())
+                    {
+                        if (content.TryGetProperty("text", out var textElement) && textElement.ValueKind == JsonValueKind.String)
+                        {
+                            var holidayInfo = textElement.GetString();
+                            return holidayInfo;
+                        }
+                    }
+                }
+
+                return "Belirtilen tarihler arasında resmi tatil bilgisi bulunamadı.";
+            }
+        }
+
+
+        public async Task<string> GetCityInformation(string country, string city, DateTime StartDate, DateTime EndDate)
         {
             // Claude için şehir bilgisi istemek üzere bir prompt oluşturuyoruz.
             var systemPrompt = $"Ülke: {country}, Şehir: {city}. Bu şehir hakkında detaylı bir paragraf bilgi ver.";
+
+            var cityInformation = "Şehir bilgisi bulunamadı.";
 
             var input = new
             {
@@ -205,13 +288,16 @@ namespace RoamAI.Services
                     {
                         if (content.TryGetProperty("text", out var textElement) && textElement.ValueKind == JsonValueKind.String)
                         {
-                            var cityInformation = textElement.GetString();
-                            return cityInformation;
+                             cityInformation = textElement.GetString();
                         }
                     }
                 }
 
-                return "Şehir hakkında bilgi bulunamadı.";
+                var holidayInfo = await GetHolidayInfo(country, StartDate, EndDate);
+
+                // Tatil bilgisini şehir bilgisine ekliyoruz
+                return $"{cityInformation}\n\n\n{holidayInfo}";
+
             }
         }
 
