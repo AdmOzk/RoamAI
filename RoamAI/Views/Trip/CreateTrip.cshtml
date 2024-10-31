@@ -130,9 +130,10 @@
         <div class="form-group row mb-3">
             <label class="col-sm-3 col-form-label">Ülke:</label>
             <div class="col-sm-9">
-                <select id="country" name="Country" asp-for="Country" class="choices" required>
+                <select id="country" name="CountryId" class="choices" required>
                     <option value="">Select Country</option>
                 </select>
+                <input type="hidden" id="countryName" name="Country" /> <!-- Hidden input for country name -->
             </div>
         </div>
         <div class="form-group row mb-3">
@@ -289,130 +290,19 @@
     });
 </script>
 
+
 <script>
     $(document).ready(function () {
-        // ViewBag'den JSON stringini alıp parse ediyoruz
-        var locations = JSON.parse('@Html.Raw(ViewBag.LocationCoordinates)'); // JSON formatındaki stringi parse ediyoruz
-        var selectedLocations = []; // Seçilen konumları saklayacağımız dizi
-
-        if (locations && Object.keys(locations).length > 0) {
-            // İlk lokasyonu alıyoruz
-            var firstLocationKey = Object.keys(locations)[0];
-            var firstLocationCoords = locations[firstLocationKey].split(',');
-            var firstLat = parseFloat(firstLocationCoords[0]);
-            var firstLng = parseFloat(firstLocationCoords[1]);
-
-            // Haritayı başlat
-            var map = new google.maps.Map(document.getElementById("map"), {
-                center: { lat: firstLat, lng: firstLng },
-                zoom: 12
-            });
-
-            // Her bir konum için marker ekliyoruz
-            Object.keys(locations).forEach(function (key) {
-                var coords = locations[key].split(',');
-                var lat = parseFloat(coords[0]);
-                var lng = parseFloat(coords[1]);
-
-                // Marker oluştur
-                var marker = new google.maps.Marker({
-                    position: { lat: lat, lng: lng },
-                    map: map,
-                    title: key
-                });
-
-                // Bilgi penceresi içeriğini ayarlıyoruz
-                var infoContent = `<b>${key}</b><br>
-                            <button onclick="addLocation(${lat}, ${lng}, '${key}')">Bu konumu rota duraklarına ekle</button><br>
-                            <a href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}" target="_blank">Tek Rota Oluştur</a>`;
-
-                var infoWindow = new google.maps.InfoWindow({
-                    content: infoContent
-                });
-
-                // Marker'a tıklandığında infoWindow açılıyor
-                marker.addListener("click", function () {
-                    infoWindow.open(map, marker);
-                });
-            });
-        }
-
-        // Konumları dizimize ekleyen fonksiyon
-        window.addLocation = function (lat, lng, key) {
-            selectedLocations.push({ lat: lat, lng: lng, name: key });
-            Swal.fire({
-                icon: 'success',
-                title: 'Durak Eklendi',
-                text: `${key} rota duraklarına eklendi!`,
-                timer: 1500,
-                showConfirmButton: false
-            });
-        };
-
-        // Seçili duraklarla çoklu duraklı rota oluşturma
-        $('#createMultiStopRoute').on('click', function () {
-            if (selectedLocations.length === 0) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Uyarı',
-                    text: 'Rota oluşturmak için en az bir konum seçin!',
-                });
-                return;
-            }
-
-            // Google Maps rota URL'sini hazırlıyoruz
-            var routeUrl = "https://www.google.com/maps/dir/?api=1";
-            routeUrl += `&origin=${selectedLocations[0].lat},${selectedLocations[0].lng}`; // İlk seçilen konum başlangıç noktası
-            routeUrl += `&destination=${selectedLocations[selectedLocations.length - 1].lat},${selectedLocations[selectedLocations.length - 1].lng}`; // Son seçilen konum varış noktası
-
-            // Ara durakları ekliyoruz
-            if (selectedLocations.length > 2) {
-                var waypoints = selectedLocations.slice(1, -1).map(loc => `${loc.lat},${loc.lng}`).join('|');
-                routeUrl += `&waypoints=${waypoints}`;
-            }
-
-            // Yeni sekmede rota oluşturmak için Google Maps'i açıyoruz
-            window.open(routeUrl, '_blank');
-
-            // Seçili durakları sıfırlıyoruz
-            selectedLocations = [];
-            Swal.fire({
-                icon: 'info',
-                title: 'Duraklar Sıfırlandı',
-                text: 'Seçili duraklar sıfırlandı. Yeni durakları seçebilirsiniz.',
-                timer: 1500,
-                showConfirmButton: false
-            });
-        });
-
-        // Seçimleri sıfırlama butonu
-        $('#resetLocations').on('click', function () {
-            selectedLocations = [];
-            Swal.fire({
-                icon: 'info',
-                title: 'Seçimler Sıfırlandı',
-                text: 'Tüm seçimler sıfırlandı.',
-                timer: 1500,
-                showConfirmButton: false
-            });
-        });
-    });
-</script>
-
-
-<!-- Custom Script -->
-<script>
-    $(document).ready(function () {
-        // Choices.js ülke select kutusuna uygula
+        // Initialize Choices.js for country selection
         const countrySelect = new Choices('#country', {
             searchEnabled: true,
             placeholderValue: 'Ülke Seçiniz',
             searchPlaceholderValue: 'Aramak için yazın...'
         });
 
-        var citiesData = [];
+        let citiesData = [];
+        // Load countries and populate the dropdown
         $.getJSON('/data/countries.json', function (data) {
-            // Ülkeler için seçenekler ekle
             countrySelect.setChoices(data.map(country => ({
                 value: country.countryId,
                 label: country.name
@@ -421,34 +311,35 @@
             console.error('Failed to load countries.json');
         });
 
+        // Load cities data
         $.getJSON('/data/cities.json', function (data) {
-            citiesData = data; // Şehir verilerini depola
+            citiesData = data;
         }).fail(function () {
             console.error('Failed to load cities.json');
         });
 
+        // When country changes, filter cities by countryId
         $('#country').change(function () {
             var selectedCountryId = $(this).val();
+            var selectedCountryName = $(this).find('option:selected').text();
+            $('#countryName').val(selectedCountryName); // Update hidden input for country name
+
             var $citySelect = $('#city');
-            $citySelect.empty(); // Önceki şehirleri temizle
+            $citySelect.empty(); // Clear previous city options
             $citySelect.append($('<option>', { value: '', text: 'Select City' }));
 
             if (selectedCountryId) {
-                var filteredCities = citiesData.filter(function (city) {
-                    return city.countryId === selectedCountryId;
-                });
-
-                // Şehirleri select kutusuna ekle
+                var filteredCities = citiesData.filter(city => city.countryId === selectedCountryId);
                 $.each(filteredCities, function (index, city) {
                     $citySelect.append($('<option>', {
-                        value: city.id,
+                        value: city.name,
                         text: city.name
                     }));
                 });
             }
         });
 
-        // Yüzde kontrolü: Toplam %100 olmalı
+        // Ensure percentages sum to 100%
         $('#submitBtn').click(function (e) {
             var cultural = parseInt($('input[name="CulturalPercentage"]').val(), 10) || 0;
             var modern = parseInt($('input[name="EntertainmantPercentage"]').val(), 10) || 0;
@@ -456,7 +347,7 @@
             var total = cultural + modern + food;
 
             if (total !== 100) {
-                e.preventDefault(); // Formun gönderilmesini engelle
+                e.preventDefault();
                 alert('Gezi türü yüzdelerinin toplamı 100 olmalıdır!');
             }
         });

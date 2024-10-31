@@ -115,33 +115,46 @@
             let selectedLocations = []; // Array to store selected locations
 
             function initMap() {
-                const mapOptions = {
-                    zoom: 10,
-                    center: { lat: 39.925533, lng: 32.866287 } // Default location (e.g., Ankara, Turkey)
-                };
+                // Fetch the location data as a plain string
+                $.get(`/Trip/GetLocations?tripId=@ViewBag.TripId`, function (data) {
+                    const locations = data.split(";");
 
-                const map = new google.maps.Map(document.getElementById("map"), mapOptions);
+                    if (locations.length > 0) {
+                        // Get the first location's coordinates
+                        const firstLocationStr = locations[0];
+                        const [, firstCoordString] = firstLocationStr.split("|");
+                        const firstCoords = parseCoordinates(firstCoordString);
 
-                // Directly get locations from the Model
-                const locations = @Html.Raw(JsonSerializer.Serialize(Model.Locations.Select(loc => new { loc.LocationName, loc.Coordinates })));
+                        // Initialize the map with the first location's coordinates as center
+                        const mapOptions = {
+                            zoom: 10,
+                            center: firstCoords ? firstCoords : { lat: 39.925533, lng: 32.866287 } // Default to Ankara if parsing fails
+                        };
 
-                locations.forEach(location => {
-                    const [name, coordString] = [location.LocationName, location.Coordinates];
-                    const coords = parseCoordinates(coordString);
+                        const map = new google.maps.Map(document.getElementById("map"), mapOptions);
 
-                    if (coords) {
-                        const marker = new google.maps.Marker({
-                            position: coords,
-                            map: map,
-                            title: name
+                        // Loop through locations to add markers
+                        locations.forEach(locationStr => {
+                            const [name, coordString] = locationStr.split("|");
+                            const coords = parseCoordinates(coordString);
+
+                            if (coords) {
+                                const marker = new google.maps.Marker({
+                                    position: coords,
+                                    map: map,
+                                    title: name
+                                });
+
+                                // Info window with button to add location
+                                const infoContent = `<b>${name}</b><br>
+                                            <button onclick="addLocation(${coords.lat}, ${coords.lng}, '${name}')">Bu konumu rota duraklarına ekle</button><br>
+                                            <a href="https://www.google.com/maps/dir/?api=1&destination=${coords.lat},${coords.lng}" target="_blank">Tek Rota Oluştur</a>`;
+
+                                const infoWindow = new google.maps.InfoWindow({ content: infoContent });
+
+                                marker.addListener("click", () => infoWindow.open(map, marker));
+                            }
                         });
-
-                        const infoContent = `<b>${name}</b><br>
-                                                    <button onclick="addLocation(${coords.lat}, ${coords.lng}, '${name}')">Bu konumu rota duraklarına ekle</button><br>
-                                                    <a href="https://www.google.com/maps/dir/?api=1&destination=${coords.lat},${coords.lng}" target="_blank">Tek Rota Oluştur</a>`;
-                        const infoWindow = new google.maps.InfoWindow({ content: infoContent });
-
-                        marker.addListener("click", () => infoWindow.open(map, marker));
                     }
                 });
             }

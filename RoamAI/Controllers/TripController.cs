@@ -40,6 +40,11 @@ namespace RoamAI.Controllers
                .Include(t => t.Locations)
                .FirstOrDefaultAsync(x => x.IdentityUserId == userId && x.IsDone == false && x.IsConfirmed == true);
 
+            if (trip != null)
+            {
+                ViewBag.TripId = trip.Id; // Set the TripId in ViewBag
+            }
+
             return View(trip);
         }
 
@@ -48,7 +53,9 @@ namespace RoamAI.Controllers
             var trip = await _db.Trips
                 .Include(t => t.Locations)
                 .FirstOrDefaultAsync(x => x.Id == id);
-            
+
+            ViewBag.TripId = id; // Set the TripId in ViewBag
+
             return View(trip);
         }
 

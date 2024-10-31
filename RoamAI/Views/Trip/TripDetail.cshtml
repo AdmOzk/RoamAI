@@ -98,60 +98,62 @@
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://maps.googleapis.com/maps/api/js?key=apikeyBuraya&callback=initMap" async defer></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=x&callback=initMap" async defer></script>
 
 
 <script>
     let selectedLocations = []; // Array to store selected locations
 
     function initMap() {
-        // Map initialization options
-        const mapOptions = {
-            zoom: 10,
-            center: { lat: 39.925533, lng: 32.866287 } // Default center location (Ankara, Turkey)
-        };
+        // Fetch the location data as a plain string
+        $.get(`/Trip/GetLocations?tripId=@ViewBag.TripId`, function (data) {
+            const locations = data.split(";");
 
-        const map = new google.maps.Map(document.getElementById("map"), mapOptions);
+            if (locations.length > 0) {
+                // Get the first location's coordinates
+                const firstLocationStr = locations[0];
+                const [, firstCoordString] = firstLocationStr.split("|");
+                const firstCoords = parseCoordinates(firstCoordString);
 
-        // Directly get locations from the Model, converted into JavaScript format
-        const locations = @Html.Raw(JsonSerializer.Serialize(Model.Locations.Select(loc => new { loc.LocationName, loc.Coordinates })));
+                // Initialize the map with the first location's coordinates as center
+                const mapOptions = {
+                    zoom: 10,
+                    center: firstCoords ? firstCoords : { lat: 39.925533, lng: 32.866287 } // Default to Ankara if parsing fails
+                };
 
-        // Add markers for each location on the map
-        locations.forEach(location => {
-            const name = location.LocationName;
-            const coordString = location.Coordinates;
-            const coords = parseCoordinates(coordString);
+                const map = new google.maps.Map(document.getElementById("map"), mapOptions);
 
-            if (coords) {
-                const marker = new google.maps.Marker({
-                    position: coords,
-                    map: map,
-                    title: name
+                // Loop through locations to add markers
+                locations.forEach(locationStr => {
+                    const [name, coordString] = locationStr.split("|");
+                    const coords = parseCoordinates(coordString);
+
+                    if (coords) {
+                        const marker = new google.maps.Marker({
+                            position: coords,
+                            map: map,
+                            title: name
+                        });
+
+                        // Info window with button to add location
+                        const infoContent = `<b>${name}</b><br>
+                                    <button onclick="addLocation(${coords.lat}, ${coords.lng}, '${name}')">Bu konumu rota duraklarına ekle</button><br>
+                                    <a href="https://www.google.com/maps/dir/?api=1&destination=${coords.lat},${coords.lng}" target="_blank">Tek Rota Oluştur</a>`;
+
+                        const infoWindow = new google.maps.InfoWindow({ content: infoContent });
+
+                        marker.addListener("click", () => infoWindow.open(map, marker));
+                    }
                 });
-
-                // Information window for each marker
-                const infoContent = `<b>${name}</b><br>
-                            <button onclick="addLocation(${coords.lat}, ${coords.lng}, '${name}')">Bu konumu rota duraklarına ekle</button><br>
-                            <a href="https://www.google.com/maps/dir/?api=1&destination=${coords.lat},${coords.lng}" target="_blank">Tek Rota Oluştur</a>`;
-                const infoWindow = new google.maps.InfoWindow({ content: infoContent });
-
-                // Open info window on marker click
-                marker.addListener("click", () => infoWindow.open(map, marker));
-            } else {
-                console.warn(`Coordinates could not be parsed for location: ${name}`);
             }
         });
     }
 
-    // Function to parse coordinates from the provided string format
     function parseCoordinates(coordinateString) {
         const regex = /([-+]?\d*\.\d+|\d+)[°]\s*([NS]),\s*([-+]?\d*\.\d+|\d+)[°]\s*([EW])/;
         const match = coordinateString.match(regex);
 
-        if (!match) {
-            console.warn(`Coordinate string did not match expected format: ${coordinateString}`);
-            return null;
-        }
+        if (!match) return null;
 
         let lat = parseFloat(match[1]);
         let lng = parseFloat(match[3]);
@@ -174,7 +176,7 @@
         });
     };
 
-    // Create a multi-stop route using Google Maps Directions
+    // Create multi-stop route
     $('#createMultiStopRoute').on('click', function () {
         if (selectedLocations.length === 0) {
             Swal.fire({
@@ -185,18 +187,15 @@
             return;
         }
 
-        // Construct the Google Maps Directions URL
         let routeUrl = "https://www.google.com/maps/dir/?api=1";
         routeUrl += `&origin=${selectedLocations[0].lat},${selectedLocations[0].lng}`;
         routeUrl += `&destination=${selectedLocations[selectedLocations.length - 1].lat},${selectedLocations[selectedLocations.length - 1].lng}`;
 
-        // Add waypoints if there are more than 2 selected locations
         if (selectedLocations.length > 2) {
             const waypoints = selectedLocations.slice(1, -1).map(loc => `${loc.lat},${loc.lng}`).join('|');
             routeUrl += `&waypoints=${waypoints}`;
         }
 
-        // Open the directions in a new tab
         window.open(routeUrl, '_blank');
         selectedLocations = []; // Clear selected stops
 
@@ -209,7 +208,7 @@
         });
     });
 
-    // Reset the selected locations
+    // Reset selected locations
     $('#resetLocations').on('click', function () {
         selectedLocations = [];
         Swal.fire({
