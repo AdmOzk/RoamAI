@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Lobster&display=swap" rel="stylesheet">
 
 
 
@@ -44,11 +45,15 @@
         }
 
         .navbar-brand {
+            font-family: 'Lobster', cursive;
+            font-size: 2rem; 
+            color: #000; 
+            text-decoration: none;
             transition: color 0.5s ease; 
         }
 
         .navbar-brand:hover {
-            color: white !important; 
+            color: darkgray !important; 
         }
 
         main {
@@ -73,7 +78,7 @@
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-transparent fixed-top border-bottom box-shadow mb-3">
 
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">RoamAI</a>
+                <a class="navbar-brand" asp-area="" asp-controller="Welcome" asp-action="Index">RoamAI</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>

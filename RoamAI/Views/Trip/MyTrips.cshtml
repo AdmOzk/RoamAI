@@ -63,8 +63,7 @@
         <div class="table-responsive">
             <table class="table table-bordered table-hover" width="100%" cellspacing="0">
                 <thead>
-                    <tr>
-                        <th>id</th>
+                    <tr>                       
                         <th>Ülke</th>
                         <th>Şehir</th>
                         <th>Gidiş Tarihi</th>
@@ -75,8 +74,7 @@
                 <tbody>
                     @foreach (var trip in Model)
                     {
-                        <tr>
-                            <td>@trip.Id</td>
+                        <tr>                          
                             <td>@trip.Country</td>
                             <td>@trip.City</td>
                             <td>@trip.StartDate.ToString("dd-MM-yyyy")</td>

@@ -15,9 +15,11 @@
         justify-content: center;
         min-height: 100vh;
     }
-    .date-group {
-    
-    margin: 15px;
+
+    .choices__placeholder {
+        font-size: 1.2em; 
+        color: #333; 
+        font-weight: bold; 
     }
 
 
@@ -29,25 +31,30 @@
         width: 700px;
         text-align: center;
         margin-top: 100px;
+        margin-bottom:100px;
     }
 
+    .form-group label{
+        text-align: left;
+
+    }
     .slider-group {
         display: flex;
         align-items: center;
-        gap: 15px;
-        width: 100%;
-        margin-top: 30px;
+        justify-content: center; 
+        width: 80%; 
+        margin: 0 auto 15px auto; 
     }
 
         .slider-group label {
             font-weight: bold;
-            text-align: left;
-            flex-basis: 40%;
+            flex-basis: 40%; 
+            text-align: left; 
+            margin-right: 20px;
         }
 
         .slider-group input[type="range"] {
             flex: 1;
-            -webkit-appearance: none;
             height: 6px;
             background: #ddd;
             outline: none;
@@ -56,28 +63,11 @@
             border-radius: 4px;
         }
 
-            .slider-group input[type="range"]::-webkit-slider-thumb {
-                -webkit-appearance: none;
-                appearance: none;
-                width: 15px;
-                height: 15px;
-                background: #007bff;
-                cursor: pointer;
-                border-radius: 50%;
-            }
-
-            .slider-group input[type="range"]::-moz-range-thumb {
-                width: 15px;
-                height: 15px;
-                background: #007bff;
-                cursor: pointer;
-                border-radius: 50%;
-            }
-
-    .slider-value {
-        width: 40px;
-        text-align: right;
-    }
+        .slider-group .slider-value {
+            width: 50px; 
+            text-align: right;
+            margin-left: 10px; 
+        }
 
     #submitBtn {
         background-color: #007bff;
@@ -99,9 +89,8 @@
         border-color: #0056b3;
     }
 
-    .header {
+    .card-header {
         background-color: rgba(0, 0, 0, 0.1);
-        color: #333;
         padding: 10px 0;
         margin-bottom: 20px;
         border-radius: 8px;
@@ -119,6 +108,13 @@
         margin:10px;
     }
 
+    .flatpickr-input {
+        padding: 10px;
+        border-radius: 5px;
+        border: 1px solid #ddd;
+        width: 100%;
+        box-sizing: border-box;
+    }
 
 </style>
 
@@ -137,13 +133,13 @@ else {
 
 
 <div class="travel-plan-card">
-    <div class="header">
+    <div class="card-header">
         <h2>Travel Planı Oluştur</h2>
     </div>
     <form method="post" asp-action="GetRecommendations" asp-controller="Trip">
         <div class="form-group row mb-3">
-            <label class="col-sm-3 col-form-label">Ülke:</label>
-            <div class="col-sm-9">
+            <label class="col-sm-4 col-form-label">Ülke:</label>
+            <div class="col-sm-6">
                 <select id="country" name="CountryId" class="choices" required>
                     <option value="">Select Country</option>
                 </select>
@@ -151,36 +147,38 @@ else {
             </div>
         </div>
         <div class="form-group row mb-3">
-            <label class="col-sm-3 col-form-label">Şehir:</label>
-            <div class="col-sm-9">
+            <label class="col-sm-4 col-form-label">Şehir:</label>
+            <div class="col-sm-6">
                 <select id="city" name="City" asp-for="City" required>
                     <option value="">Select City</option>
                 </select>
             </div>
         </div>
-        <div class="date-group">
-            <div class="form-group">
-                <label>Gidiş: </label>
+        <div class="form-group row mb-3">
+            <label class="col-sm-4 col-form-label">Gidiş Tarihi: </label>
+            <div class="col-sm-6">
                 <input type="date" name="StartDate" asp-for="StartDate" required />
             </div>
-            <div class="form-group">
-                <label>Dönüş: </label>
+        </div>
+        <div class="form-group row mb-3">
+            <label class="col-sm-4 col-form-label">Dönüş Tarihi: </label>
+            <div class="col-sm-6">
                 <input type="date" name="EndDate" asp-for="EndDate" required />
             </div>
         </div>
-        <div class="slider-group">
+        <div class="form-group slider-group">
             <label>Kültürel Gezi:</label>
             <input type="range" name="CulturalPercentage" asp-for="CulturalPercentage" min="0" max="100" value="40" step="10" oninput="document.getElementById('culturalValue').textContent = this.value + '%'">
             <span id="culturalValue" class="slider-value">40%</span>
         </div>
 
-        <div class="slider-group">
+        <div class="form-group slider-group">
             <label>Modern Gezi:</label>
             <input type="range" name="EntertainmantPercentage" asp-for="EntertainmantPercentage" min="0" max="100" value="30" step="10" oninput="document.getElementById('entertainmentValue').textContent = this.value + '%'">
             <span id="entertainmentValue" class="slider-value">30%</span>
         </div>
 
-        <div class="slider-group">
+        <div class="form-group slider-group">
             <label>Yemek Üzerine Gezi:</label>
             <input type="range" name="FoodPercentage" asp-for="FoodPercentage" min="0" max="100" value="30" step="10" oninput="document.getElementById('foodValue').textContent = this.value + '%'">
             <span id="foodValue" class="slider-value">30%</span>
@@ -226,6 +224,8 @@ else {
 }
 <!-- Choices.js CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
 <!-- jQuery CDN -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -315,6 +315,12 @@ else {
             searchPlaceholderValue: 'Aramak için yazın...'
         });
 
+        const citySelect = new Choices('#city', {
+            searchEnabled: true,
+            placeholderValue: 'Şehir Seçiniz',
+            searchPlaceholderValue: 'Şehir aramak için yazın...'
+        });
+
         let citiesData = [];
         // Load countries and populate the dropdown
         $.getJSON('/data/countries.json', function (data) {
@@ -339,18 +345,19 @@ else {
             var selectedCountryName = $(this).find('option:selected').text();
             $('#countryName').val(selectedCountryName); // Update hidden input for country name
 
-            var $citySelect = $('#city');
-            $citySelect.empty(); // Clear previous city options
-            $citySelect.append($('<option>', { value: '', text: 'Select City' }));
-
             if (selectedCountryId) {
+                // Filter cities based on selected country
                 var filteredCities = citiesData.filter(city => city.countryId === selectedCountryId);
-                $.each(filteredCities, function (index, city) {
-                    $citySelect.append($('<option>', {
-                        value: city.name,
-                        text: city.name
-                    }));
-                });
+
+                // Update city dropdown with filtered cities using Choices.js
+                citySelect.clearChoices();
+                citySelect.setChoices(filteredCities.map(city => ({
+                    value: city.name,
+                    label: city.name
+                })), 'value', 'label', true);
+            } else {
+                citySelect.clearChoices(); 
+                citySelect.setChoices([{ value: '', label: 'Şehir Seçiniz' }]);
             }
         });
 
@@ -367,4 +374,88 @@ else {
             }
         });
     });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () { 
+        const culturalInput = document.querySelector('input[name="CulturalPercentage"]');
+        const entertainmentInput = document.querySelector('input[name="EntertainmantPercentage"]');
+        const foodInput = document.querySelector('input[name="FoodPercentage"]');
+
+        [culturalInput, entertainmentInput, foodInput].forEach(input => {
+            input.addEventListener('input', () => {
+                enforceMaxTotal();
+            });
+        });
+
+        function enforceMaxTotal() {
+            const culturalValue = parseInt(culturalInput.value) || 0;
+            const entertainmentValue = parseInt(entertainmentInput.value) || 0;
+            const foodValue = parseInt(foodInput.value) || 0;
+            const total = culturalValue + entertainmentValue + foodValue;
+
+            if (total > 100) {
+                const excess = total - 100;
+
+                if (document.activeElement === culturalInput) {
+                    culturalInput.value = culturalValue - excess;
+                    document.getElementById('culturalValue').textContent = `${culturalInput.value}%`;
+                } else if (document.activeElement === entertainmentInput) {
+                    entertainmentInput.value = entertainmentValue - excess;
+                    document.getElementById('entertainmentValue').textContent = `${entertainmentInput.value}%`;
+                } else if (document.activeElement === foodInput) {
+                    foodInput.value = foodValue - excess;
+                    document.getElementById('foodValue').textContent = `${foodInput.value}%`;
+                }
+            }
+        }
+    });
+
+</script>
+<script>
+    $(document).ready(function () {
+        flatpickr('input[name="StartDate"]', {
+            altInput: true,
+            altFormat: "d.m.Y", 
+            dateFormat: "Y-m-d",
+            minDate: "today",
+            allowInput: true,
+            locale: {
+                firstDayOfWeek: 1,
+                weekdays: {
+                    shorthand: ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'],
+                    longhand: ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar']
+                },
+                months: {
+                    shorthand: ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'],
+                    longhand: ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık']
+                }
+            },
+            onReady: function (selectedDates, dateStr, instance) {
+                instance.altInput.setAttribute("placeholder", "Bir Tarih Seçiniz");
+            }
+        });
+
+        flatpickr('input[name="EndDate"]', {
+            altInput: true,
+            altFormat: "d.m.Y",
+            dateFormat: "Y-m-d",
+            minDate: "today",
+            allowInput: true,
+            locale: {
+                firstDayOfWeek: 1,
+                weekdays: {
+                    shorthand: ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'],
+                    longhand: ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar']
+                },
+                months: {
+                    shorthand: ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'],
+                    longhand: ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık']
+                }
+            },
+            onReady: function (selectedDates, dateStr, instance) {
+                instance.altInput.setAttribute("placeholder", "Bir Tarih Seçiniz");
+            }
+        });
+    });
+
 </script>
