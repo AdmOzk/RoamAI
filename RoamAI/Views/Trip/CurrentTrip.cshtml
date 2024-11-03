@@ -6,8 +6,16 @@
 
     @if (Model != null)
     {
-        <div class="row mt-3 text-center">
-            <p class="h1 ms-3 mb-3 border-bottom border-success">@Model.Country - @Model.City</p>
+        <div class="row mt-3 text-center">  
+            
+            <div class="sticky-header">
+                <div class="header-content">
+                    <h2 class="text-primary text-center mb-2" >@Model.Country - @Model.City</h2>
+                    <div class="button-container">
+                        <a style="padding:10px; height:50px; font-size:20px;" class="btn btn-sm btn-outline-danger" asp-controller="Trip" asp-action="changeDoneTripStatus" asp-route-id="@Model.Id" style="width:25%; font-size:20px;">Seyahati Bitir</a>
+                    </div>
+                </div>
+            </div>
 
             <div class="col-md-3 mb-3" style="width: 20%;">
                 <div class="card text-center" style="background-color: rgba(255, 255, 255, 0.9); ">
@@ -81,14 +89,11 @@
                     </div>
                 </div>
             </div>
-            <div class="text-center">
-                <a class="btn btn-sm btn-danger" asp-controller="Trip" asp-action="changeDoneTripStatus" asp-route-id="@Model.Id" style="width:25%; font-size:20px;">Seyahati Bitir</a>
-            </div>
             <div class="col-12" style="margin-top:30px;">
                 <div class="card mb-4" style="background-color: rgba(255, 255, 255, 0.9);">
                     <div class="card-header">
                         <h2 class="text-center card-title">
-                            Location Map
+                            Seyahat Haritası
                         </h2>
                     </div>
 
@@ -104,6 +109,20 @@
                 </div>
             </div>
 
+            <div class="col-12" style="margin-top: 30px;">
+                <div class="card mb-4" style="background-color: rgba(255, 255, 255, 0.9);">
+                    <div class="card-header">
+                        <h2 class="text-center card-title">
+                            Hava Durumu Tahmini
+                        </h2>
+                    </div>
+                    <div class="card-body">
+                        <div id="weatherForecastTable" class="table-responsive">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
 
         </div>
         <!-- Include SweetAlert2 for notifications -->
@@ -111,6 +130,88 @@
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script src="https://maps.googleapis.com/maps/api/js?key=x&callback=initMap" async defer></script>
 
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const apiKey = "APİKEY";  
+
+                const city = "@Html.Raw(@Model.City)";
+                const country = "@Model.Country";
+                const startDate = "@(@Model.StartDate.ToString("yyyy-MM-dd"))";
+                const endDate = "@(@Model.EndDate.ToString("yyyy-MM-dd"))";
+
+                const weatherApiUrl = `https://api.weatherbit.io/v2.0/forecast/daily?city=${city}&country=${country}&key=${apiKey}`;
+
+                const descriptionMapping = {
+                    "Clear Sky": "Açık hava",
+                    "Scattered clouds": "Dağınık bulutlar",
+                    "Few clouds": "Az bulutlu",
+                    "Broken clouds": "Parçalı bulutlu",
+                    "Overcast clouds": "Kapalı bulutlu",
+                    "Light rain": "Hafif yağmur",
+                    "Moderate rain": "Orta şiddette yağmur",
+                    "Heavy rain": "Şiddetli yağmur",
+                    "Snow": "Kar",
+                    "Thunderstorm": "Gök gürültülü fırtına",
+                    "Mist": "Sis"
+                };
+
+                fetch(weatherApiUrl)
+                    .then(response => {
+                        console.log("API Response Status:", response.status); 
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log("Weather Data:", data); 
+                        if (data && data.data) {
+                            const startDateObj = new Date(startDate);
+                            const endDateObj = new Date(endDate);
+
+                            let weatherTable = `
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Tarih</th>
+                                            <th>En Yüksek Sıcaklık (°C)</th>
+                                            <th>En Düşük Sıcaklık (°C)</th>
+                                            <th>Ortalama Sıcaklık (°C)</th>
+                                            <th>Açıklama</th>
+                                            <th>Durum</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>`;
+
+                            data.data.forEach(day => {
+                                const currentDateObj = new Date(day.datetime);
+                                if (currentDateObj >= startDateObj && currentDateObj <= endDateObj) {
+                                    const englishDescription = day.weather.description;
+                                    const turkishDescription = descriptionMapping[englishDescription] || englishDescription;
+
+                                    weatherTable += `
+                                        <tr>
+                                            <td>${new Date(day.datetime).toLocaleDateString()}</td>
+                                            <td>${day.max_temp}</td>
+                                            <td>${day.min_temp}</td>
+                                            <td>${day.temp}</td>
+                                            <td>${turkishDescription}</td>
+                                            <td><img src="https://www.weatherbit.io/static/img/icons/${day.weather.icon}.png" alt="${turkishDescription}" width="30" height="30" /></td>
+
+                                        </tr>`;
+                                }
+                            });
+
+                            weatherTable += `</tbody></table>`;
+
+                            document.getElementById("weatherForecastTable").innerHTML = weatherTable;
+                        } else {
+                            document.getElementById("weatherForecastTable").innerHTML = "<p>Hava durumu verisi bulunamadı.</p>";
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Hava durumu verisi alınırken hata oluştu:", error);
+                        document.getElementById("weatherForecastTable").innerHTML = "<p>Hava durumu verisi alınırken bir hata oluştu.</p>";
+                    });
+            });
+        </script>
         <script>
             let selectedLocations = []; // Array to store selected locations
 
@@ -257,5 +358,65 @@
 
     .card {
         background-color: rgba(255, 255, 255, 0.8);
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    thead {
+        background-color: #007bff;
+        color: #fff;
+        text-align: center;
+    }
+
+    th, td {
+        padding: 15px;
+        text-align: center;
+        border-bottom: 1px solid #ddd;
+    }
+
+    tbody tr:hover {
+        background-color: rgba(0, 123, 255, 0.1);
+    }
+
+    tbody tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+
+    tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    img {
+        vertical-align: middle;
+    }
+
+    .sticky-header {
+        position: sticky;
+        top: 100px;
+        background-color: rgba(255, 255, 255, 0.9);
+        padding: 10px;
+        margin: 10px 0;
+        z-index: 1000;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        border-radius: 10px;
+    }
+
+    .header-content {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position:relative;
+    }
+
+    .button-container {
+        position:absolute;
+        right:0;
     }
 </style>
