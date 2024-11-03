@@ -159,30 +159,35 @@ namespace RoamAI.Services
 
         public async Task<string> GetHolidayInfo(string country, DateTime StartDate, DateTime EndDate)
         {
-            var holidayList = @"
-    TÜRKİYE: 
-        - Yılbaşı: 1 Ocak
-        - Ulusal Egemenlik ve Çocuk Bayramı: 23 Nisan
-        - Emek ve Dayanışma Günü: 1 Mayıs
-        - Atatürk'ü Anma, Gençlik ve Spor Bayramı: 19 Mayıs
-        - Zafer Bayramı: 30 Ağustos
-        - Cumhuriyet Bayramı: 29 Ekim
-    ABD: 
-        - Yeni Yıl: 1 Ocak
-        - Bağımsızlık Günü: 4 Temmuz
-        - Şükran Günü: Kasım ayının dördüncü perşembesi
-        - Noel: 25 Aralık
-    ALMANYA: 
-        - Yılbaşı: 1 Ocak
-        - İyi Cuma: Tarihi değişken
-        - İşçi Bayramı: 1 Mayıs
-        - Alman Birliği Günü: 3 Ekim
-        - Noel: 25 Aralık
-        - İkinci Noel Günü: 26 Aralık
-    ";
+            var systemPrompt = $@"
+tatil listesi:
+TÜRKİYE: 
+    - Yılbaşı: 1 Ocak
+    - Ulusal Egemenlik ve Çocuk Bayramı: 23 Nisan
+    - Emek ve Dayanışma Günü: 1 Mayıs
+    - Atatürk'ü Anma, Gençlik ve Spor Bayramı: 19 Mayıs
+    - Zafer Bayramı: 30 Ağustos
+    - Cumhuriyet Bayramı: 29 Ekim
+ABD: 
+    - Yeni Yıl: 1 Ocak
+    - Bağımsızlık Günü: 4 Temmuz
+    - Şükran Günü: Kasım ayının dördüncü perşembesi
+    - Noel: 25 Aralık
+ALMANYA: 
+    - Yılbaşı: 1 Ocak
+    - İyi Cuma: Tarihi değişken
+    - İşçi Bayramı: 1 Mayıs
+    - Alman Birliği Günü: 3 Ekim
+    - Noel: 25 Aralık
+    - İkinci Noel Günü: 26 Aralık
 
-            var systemPrompt = $"Belirtilen {holidayList} tatil listesine göre, {country} için {StartDate:yyyy-MM-dd} ile {EndDate:yyyy-MM-dd} tarihleri arasında resmi bir tatil olup olmadığını kontrol et.\n" +
-                               "Eğer tatil varsa, tatil tarihlerinin yanına ⚠️ 'Olası Yoğunluğa Karşı Dikkatli olunuz' şeklinde bir uyarı ekleyerek belirt. Eğer tatil yoksa, 'Gideceğiniz tarih herhangi bir milli bayrama denk gelmiyor.' mesajını ver. Sadece ilgili tatil için cevap döndür tam listeyi verme.";
+Yukarıdaki tatil listesine göre:
+1. Öncelikle, {country} ülkesinin tatil listesinde olup olmadığını kontrol et. Eğer listede yoksa, '⚠️ {country} için tatil kontrolü şuanda sağlanmamaktadır.' yanıtını döndür.
+2. Eğer listede varsa, {StartDate:yyyy-MM-dd} ile {EndDate:yyyy-MM-dd} tarihleri arasında resmi bir tatil olup olmadığını kontrol et.
+   - Eğer belirtilen tarihler arasında tatil varsa, her bir tatil tarihi için '⚠️ Olası Yoğunluğa Karşı Dikkatli olunuz' uyarısını ekle.
+   - Eğer tatil yoksa, 'Gideceğiniz tarih herhangi bir milli bayrama denk gelmiyor.' mesajını ver.
+Sadece belirtilen tatil bilgilerini döndür, tam listeyi verme. Her zaman bu formatta yanıt döndür.
+";
 
             var input = new
             {
