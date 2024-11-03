@@ -10,7 +10,12 @@
         "Dubai - Burj Khalifa'nın zirvesine ulaşmak için 2.909 basamak tırmanmanız gerekir!",
         "Yükleniyor...",
         "Londra - Big Ben, aslında çanın adı; saatin resmi adı Elizabeth Kulesi’dir!",
-        "Tokyo - Tokyo Kulesi, Eyfel Kulesi’nden 13 metre daha uzundur!"
+        "Tokyo - Tokyo Kulesi, Eyfel Kulesi’nden 13 metre daha uzundur!",
+        "Machu Picchu, deniz seviyesinden 2.430 metre yüksekliktedir.",
+        "Antarktika, dünyanın en soğuk yeri olarak bilinir.",
+        "Norveç, Kuzey Işıkları'nın en iyi gözlemlendiği yerlerden biridir.",
+        "Hindistan'daki Himalayalar, dünyanın en yüksek zirvelerine ev sahipliği yapar.",
+        "Avustralya'daki Büyük Set Resifi, dünyadaki en büyük mercan resifidir."
     ];
 
     let currentMessageIndex = 0;

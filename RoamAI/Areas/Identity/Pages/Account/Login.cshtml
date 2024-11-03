@@ -2,11 +2,11 @@
 @model LoginModel
 
 @{
-    ViewData["Title"] = "Login";
+    ViewData["Title"] = "Giriş Yap";
 }
 
-<div class="d-flex justify-content-center align-items-center" style="min-height: 95vh; background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('/images/travel-background.png') no-repeat center center/cover;">
-    <div class="card shadow-lg" style="width: 100%; max-width: 500px; background-color: rgba(255, 255, 255, 0.7);">
+<div class="d-flex justify-content-center align-items-center" style="min-height: 95vh; background: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.5)), url('/images/travel8.png') no-repeat center center/cover;">
+    <div class="card shadow-lg" style="width: 100%; max-width: 500px; background-color: rgba(255, 255, 255, 0.8);">
         <div class="card-header text-center">
             <h2>@ViewData["Title"]</h2>
         </div>
@@ -22,31 +22,31 @@
 
                 <div class="form-floating mb-3">
                     <input asp-for="Input.Password" type="password" class="form-control" autocomplete="current-password" placeholder="password" />
-                    <label asp-for="Input.Password">Password</label>
+                    <label asp-for="Input.Password">Parola</label>
                     <span asp-validation-for="Input.Password" class="text-danger"></span>
                 </div>
 
                 <div class="form-check mb-3">
                     <input asp-for="Input.RememberMe" class="form-check-input" />
-                    <label asp-for="Input.RememberMe" class="form-check-label">Remember Me</label>
+                    <label asp-for="Input.RememberMe" class="form-check-label">Beni Hatırla</label>
                 </div>
 
                 <button id="login-submit" type="submit" class="btn btn-primary w-100 mb-3" style="font-size: 1.2rem; padding: 10px; border-radius: 5px;">
-                    Log in
+                    Giriş Yap
                 </button>
 
                 <div class="d-flex justify-content-between">
                     <button type="button" id="forgot-password" class="btn btn-outline-primary me-2 w-100 text-nowrap" data-bs-toggle="modal" data-bs-target="#forgotPasswordModal">
-                        Forgot Password
+                        Parolamı Unuttum 
                     </button>
                     <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl" class="btn btn-outline-primary w-100 text-nowrap" role="button">
-                        Register
+                        Kayıt Ol
                     </a>
                 </div>
                 
                 <div class="d-flex justify-content-center mt-2">
                     <button type="button" id="resend-confirmation" class="btn btn-outline-primary w-100 text-nowrap" data-bs-toggle="modal" data-bs-target="#resendConfirmationModal">
-                        Resend Email Confirmation
+                        E-posta Onayını Yeniden Gönder
                     </button>
                 </div>
             </form>
