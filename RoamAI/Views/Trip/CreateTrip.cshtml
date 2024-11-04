@@ -50,12 +50,13 @@
             font-weight: bold;
             flex-basis: 40%; 
             text-align: left; 
-            margin-right: 20px;
+            margin-right: 15px;
+            
         }
 
         .slider-group input[type="range"] {
             flex: 1;
-            height: 6px;
+            height: 15px;
             background: #ddd;
             outline: none;
             opacity: 0.9;
@@ -64,7 +65,7 @@
         }
 
         .slider-group .slider-value {
-            width: 50px; 
+            width: 75px; 
             text-align: right;
             margin-left: 10px; 
         }
@@ -138,7 +139,7 @@ else {
     </div>
     <form method="post" asp-action="GetRecommendations" asp-controller="Trip">
         <div class="form-group row mb-3">
-            <label class="col-sm-4 col-form-label">Ülke:</label>
+            <label class="col-sm-4 col-form-label" style="margin-top:5px;">Ülke:</label>
             <div class="col-sm-6">
                 <select id="country" name="CountryId" class="choices" required>
                     <option value="">Select Country</option>
@@ -147,7 +148,7 @@ else {
             </div>
         </div>
         <div class="form-group row mb-3">
-            <label class="col-sm-4 col-form-label">Şehir:</label>
+            <label class="col-sm-4 col-form-label" style="margin-top:5px;">Şehir:</label>
             <div class="col-sm-6">
                 <select id="city" name="City" asp-for="City" required>
                     <option value="">Select City</option>
@@ -155,30 +156,30 @@ else {
             </div>
         </div>
         <div class="form-group row mb-3">
-            <label class="col-sm-4 col-form-label">Gidiş Tarihi: </label>
+            <label class="col-sm-4 col-form-label" style="margin-top:5px;">Gidiş Tarihi: </label>
             <div class="col-sm-6">
                 <input type="date" name="StartDate" asp-for="StartDate" required />
             </div>
         </div>
         <div class="form-group row mb-3">
-            <label class="col-sm-4 col-form-label">Dönüş Tarihi: </label>
+            <label class="col-sm-4 col-form-label" style="margin-top:5px;">Dönüş Tarihi: </label>
             <div class="col-sm-6">
                 <input type="date" name="EndDate" asp-for="EndDate" required />
             </div>
         </div>
-        <div class="form-group slider-group">
+        <div class="form-group row mb-3 slider-group" style="margin-top:25px;">
             <label>Kültürel Gezi:</label>
             <input type="range" name="CulturalPercentage" asp-for="CulturalPercentage" min="0" max="100" value="40" step="10" oninput="document.getElementById('culturalValue').textContent = this.value + '%'">
             <span id="culturalValue" class="slider-value">40%</span>
         </div>
 
-        <div class="form-group slider-group">
+        <div class="form-group row mb-3 slider-group">
             <label>Modern Gezi:</label>
             <input type="range" name="EntertainmantPercentage" asp-for="EntertainmantPercentage" min="0" max="100" value="30" step="10" oninput="document.getElementById('entertainmentValue').textContent = this.value + '%'">
             <span id="entertainmentValue" class="slider-value">30%</span>
         </div>
 
-        <div class="form-group slider-group">
+        <div class="form-group row mb-3 slider-group">
             <label>Yemek Üzerine Gezi:</label>
             <input type="range" name="FoodPercentage" asp-for="FoodPercentage" min="0" max="100" value="30" step="10" oninput="document.getElementById('foodValue').textContent = this.value + '%'">
             <span id="foodValue" class="slider-value">30%</span>
