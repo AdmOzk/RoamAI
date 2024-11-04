@@ -1,0 +1,56 @@
+﻿@page
+@model RegisterConfirmationModel
+@{
+    ViewData["Title"] = "Kayıt Onayı";
+}
+
+<div class="confirmation-container" style="margin-top:150px;">
+    <h1>@ViewData["Title"]</h1>
+    @if (@Model.DisplayConfirmAccountLink)
+    {
+        <p class="info-text">
+            Bu bağlantı e-posta ile gönderilirdi:
+            <br />
+            <a id="confirm-link" href="@Model.EmailConfirmationUrl">Hesabınızı onaylamak için buraya tıklayın</a>.
+        </p>
+    }
+    else
+    {
+        <p class="info-text">
+            Lütfen hesabınızı onaylamak için e-posta adresinizi kontrol edin.
+        </p>
+    }
+</div>
+
+<style>
+    .confirmation-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        margin-top: 50px;
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .info-text {
+        font-size: 1.1em;
+        line-height: 1.6;
+        color: #333;
+    }
+
+    #confirm-link {
+        color: #007bff;
+        text-decoration: none;
+    }
+
+        #confirm-link:hover {
+            text-decoration: underline;
+        }
+</style>
