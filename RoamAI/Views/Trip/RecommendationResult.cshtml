@@ -42,6 +42,12 @@
             <div class="card-body">
                 <p style="font-size: 23px;">@Model.Description</p>
             </div>
+            
+            <button id="playDescriptionAudio" class="btn btn-primary">Açıklamayı Dinle</button>
+
+            <div id="audioContainer" style="margin-top: 15px;">
+                <!-- Audio player burada dinamik olarak yüklenecek -->
+            </div>
         </div>
     </div>
 
@@ -67,6 +73,7 @@
                 <h2 class="text-center card-title">
                     Hava Durumu Tahmini
                 </h2>
+                 <h6 class="text-center card-title">(Bugünden itibaren 1-15 gün arası hava durumu bilgisi sağlanmaktadır.) </h6>
             </div>
             <div class="card-body">
                 <div id="weatherForecastTable" class="table-responsive">
@@ -80,6 +87,34 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <!-- Google Maps API script without the marker library -->
+<script src="https://maps.googleapis.com/maps/api/js?key=x&callback=initMap" async defer></script>
+
+<script>
+    // "Açıklamayı Dinle" butonuna tıklanınca AJAX ile ses dosyasını çağır
+    document.getElementById("playDescriptionAudio").addEventListener("click", function () {
+        $.ajax({
+            url: '@Url.Action("SynthesizeDescription", "Trip", new { id = Model.Id, viewName = ViewContext.View.Path })',
+            method: 'GET',
+            success: function (response) {
+                if (response.success) {
+                    // Ses dosyasını sayfaya ekle
+                    const audioContainer = document.getElementById("audioContainer");
+                    audioContainer.innerHTML = `
+                                <audio controls autoplay>
+                                    <source src="${response.audioUrl}" type="audio/mpeg">
+                                    Tarayıcınız ses dosyasını çalamıyor.
+                                </audio>`;
+                } else {
+                    alert(response.message);
+                }
+            },
+            error: function () {
+                alert("Ses dosyası yüklenirken bir hata oluştu.");
+            }
+        });
+    });
+</script>
+
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const apiKey = "Apikey";  

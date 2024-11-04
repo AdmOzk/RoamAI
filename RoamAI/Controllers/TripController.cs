@@ -237,7 +237,39 @@ namespace RoamAI.Controllers
             return string.Join(";", locations);
         }
 
+        public async Task<IActionResult> SynthesizeText(string text,int tripId)
+        {
+            // Modelden gelen veya view'dan gelen metin
+            string audioUrl = await _claudeService.SynthesizeSpeechAsync(text,tripId);
 
+            // View'e ses dosyasının yolunu gönder
+            ViewBag.AudioUrl = audioUrl;
+            return View();
+        }
+
+
+
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> SynthesizeDescription(int id, string viewName = "RecommendationResult")
+        {
+            var trip = await _db.Trips.FirstOrDefaultAsync(t => t.Id == id);
+            if (trip == null || string.IsNullOrWhiteSpace(trip.Description))
+            {
+                return Json(new { success = false, message = "Açıklama bulunamadı veya mevcut değil." });
+            }
+
+            // Açıklamayı seslendirin ve tripId kullanarak benzersiz dosya adı oluşturun
+            string audioUrl = await _claudeService.SynthesizeSpeechAsync(trip.Description, trip.Id);
+
+            if (audioUrl == null)
+            {
+                return Json(new { success = false, message = "Seslendirme sırasında bir hata oluştu." });
+            }
+
+            // Ses dosyasının URL'sini JSON olarak döndürün
+            return Json(new { success = true, audioUrl });
+        }
 
         [Authorize]
         [HttpGet]

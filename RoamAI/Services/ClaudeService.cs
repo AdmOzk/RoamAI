@@ -1,4 +1,7 @@
 ﻿using Amazon.BedrockRuntime;
+using Amazon.Polly;
+using Amazon.Polly.Model;
+using Amazon.Runtime;
 using Amazon.BedrockRuntime.Model;
 using Amazon.Runtime;
 using Microsoft.Extensions.Configuration;
@@ -7,12 +10,15 @@ using System.IO;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Azure.Core;
+using Azure;
 
 namespace RoamAI.Services
 {
     public class ClaudeService
     {
         private readonly AmazonBedrockRuntimeClient _runtimeClient;
+        private readonly AmazonPollyClient _pollyClient;
 
         public static Dictionary<string, string> locationCoordinates = new Dictionary<string, string>();
 
@@ -30,26 +36,33 @@ namespace RoamAI.Services
             };
 
             _runtimeClient = new AmazonBedrockRuntimeClient(credentials, config);
+
+            var pollyConfig = new AmazonPollyConfig
+            {
+                RegionEndpoint = Amazon.RegionEndpoint.GetBySystemName(region)
+            };
+            _pollyClient = new AmazonPollyClient(credentials, pollyConfig);
+
         }
 
-        public async Task<ClaudeResponseModel> GetTravelRecommendations(string country, string city, DateTime StartDate,DateTime EndDate, int culturalPercentage, int EntertainmantPercentage, int foodPercentage)
+        public async Task<ClaudeResponseModel> GetTravelRecommendations(string country, string city, DateTime StartDate, DateTime EndDate, int culturalPercentage, int EntertainmantPercentage, int foodPercentage)
         {
 
             locationCoordinates.Clear();
 
             ClaudeResponseModel cresponse = new ClaudeResponseModel();
             // Prompt
-           var systemPrompt = $"Ülke-şehir-gideceği tarih: {country}-{city}-{StartDate}-{EndDate}, gezi türü yüzdesi: %Kültürel: {culturalPercentage}, %Eğlence: {EntertainmantPercentage}, %Yemek: {foodPercentage}. " +
-    "Her gün için önerilecek toplam yer sayısını sen belirle ve bu sayıyı yüzdelere göre kültürel, eğlence ve yemek kategorilerine böl. Önerdiğin yer sayısı her kategori için yüzdeye uygun olmalı. " +
-    "Her gün farklı yerler öner ve bu yerler benzersiz olmalıdır. Önerilerin her biri 'Yer İsmi (Koordinatlar: xx.xxxx°N, xx.xxxx°E)' formatında olmalıdır. " +
-    "Her günün önerilerini şu şekilde yüzdelere göre dağıt:\n" +
-    "1. Gün (Giriş Tarihi: {StartDate}):\n" +
-    $"- Kültürel (%{culturalPercentage}): Kültürel yer önerilerini günün toplam öneri sayısının %{culturalPercentage} kadarı olacak şekilde yap.\n" +
-    $"- Modern (%{EntertainmantPercentage}): Eğlence yer önerilerini günün toplam öneri sayısının %{EntertainmantPercentage} kadarı olacak şekilde yap.\n" +
-    $"- Yemek (%{foodPercentage}): Yemek yer önerilerini günün toplam öneri sayısının %{foodPercentage} kadarı olacak şekilde yap.\n" +
-    "Her gün için öneri yaparken, her kategoride benzersiz yerler öner ve aynı yeri başka bir günde tekrar etme. Her öneri, belirtilen formatta ('Yer İsmi (Koordinatlar: xx.xxxx°N, xx.xxxx°E)') olmalıdır. " +
-   "Günleri kalacağı gün kadar devam ettir. Günlerin tamamını detaylı olarak listele, kısaltma ya da '...' ifadesi kullanma. Kullanıcının belirttiği gün sayısı kadar günü ayrı ayrı detaylandır." +
-   "Yanıtın her zaman bu formatta olmalı.";
+            var systemPrompt = $"Ülke-şehir-gideceği tarih: {country}-{city}-{StartDate}-{EndDate}, gezi türü yüzdesi: %Kültürel: {culturalPercentage}, %Eğlence: {EntertainmantPercentage}, %Yemek: {foodPercentage}. " +
+     "Her gün için önerilecek toplam yer sayısını sen belirle ve bu sayıyı yüzdelere göre kültürel, eğlence ve yemek kategorilerine böl. Önerdiğin yer sayısı her kategori için yüzdeye uygun olmalı. " +
+     "Her gün farklı yerler öner ve bu yerler benzersiz olmalıdır. Önerilerin her biri 'Yer İsmi (Koordinatlar: xx.xxxx°N, xx.xxxx°E)' formatında olmalıdır. " +
+     "Her günün önerilerini şu şekilde yüzdelere göre dağıt:\n" +
+     "1. Gün (Giriş Tarihi: {StartDate}):\n" +
+     $"- Kültürel (%{culturalPercentage}): Kültürel yer önerilerini günün toplam öneri sayısının %{culturalPercentage} kadarı olacak şekilde yap.\n" +
+     $"- Modern (%{EntertainmantPercentage}): Eğlence yer önerilerini günün toplam öneri sayısının %{EntertainmantPercentage} kadarı olacak şekilde yap.\n" +
+     $"- Yemek (%{foodPercentage}): Yemek yer önerilerini günün toplam öneri sayısının %{foodPercentage} kadarı olacak şekilde yap.\n" +
+     "Her gün için öneri yaparken, her kategoride benzersiz yerler öner ve aynı yeri başka bir günde tekrar etme. Her öneri, belirtilen formatta ('Yer İsmi (Koordinatlar: xx.xxxx°N, xx.xxxx°E)') olmalıdır. " +
+    "Günleri kalacağı gün kadar devam ettir. Günlerin tamamını detaylı olarak listele, kısaltma ya da '...' ifadesi kullanma. Kullanıcının belirttiği gün sayısı kadar günü ayrı ayrı detaylandır." +
+    "Yanıtın her zaman bu formatta olmalı.";
 
             var input = new
             {
@@ -131,20 +144,20 @@ namespace RoamAI.Services
                             }
 
                             Dictionary<string, string> LocationsAndCoordinates = new Dictionary<string, string>();
-                            
+
                             LocationsAndCoordinates.Clear();
-                            
+
                             foreach (var entry in locationCoordinates)
                             {
-                                LocationsAndCoordinates.Add(entry.Key, entry.Value);    
+                                LocationsAndCoordinates.Add(entry.Key, entry.Value);
                             }
 
 
 
                             cresponse.LocationCoordinates = LocationsAndCoordinates;
                             cresponse.text = fullText;
-                            
-                            
+
+
                             return cresponse;
                         }
                     }
@@ -152,7 +165,7 @@ namespace RoamAI.Services
 
                 return cresponse;
 
-                
+
             }
         }
 
@@ -293,7 +306,7 @@ Sadece belirtilen tatil bilgilerini döndür, tam listeyi verme. Her zaman bu fo
                     {
                         if (content.TryGetProperty("text", out var textElement) && textElement.ValueKind == JsonValueKind.String)
                         {
-                             cityInformation = textElement.GetString();
+                            cityInformation = textElement.GetString();
                         }
                     }
                 }
@@ -306,5 +319,26 @@ Sadece belirtilen tatil bilgilerini döndür, tam listeyi verme. Her zaman bu fo
             }
         }
 
+        public async Task<string> SynthesizeSpeechAsync(string text, int tripId)
+        {
+            var request = new SynthesizeSpeechRequest
+            {
+                Text = text,
+                OutputFormat = OutputFormat.Mp3,
+                VoiceId = VoiceId.Burcu,
+                Engine = Engine.Neural 
+            };
+
+            var response = await _pollyClient.SynthesizeSpeechAsync(request);
+
+            // Dosyayı kaydet
+            var outputFileName = Path.Combine("wwwroot/audio", $"trip_{tripId}_description.mp3");
+            using (var fileStream = new FileStream(outputFileName, FileMode.Create, FileAccess.Write))
+            {
+                await response.AudioStream.CopyToAsync(fileStream);
+            }
+
+            return $"/audio/trip_{tripId}_description.mp3"; // View'da kullanılacak dosya yolu
+        }
     }
 }
