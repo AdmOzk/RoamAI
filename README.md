@@ -60,7 +60,7 @@ completed the competition among the top 11 projects out of an initial 37.
 ![result10](https://github.com/user-attachments/assets/fab3a680-ffc6-4a27-8767-fdd67a7efd97)
 
 
-## Display Current Trip Details.
+## Display/Manage Current or Previous Trip Details.
 
 ![mytrips](https://github.com/user-attachments/assets/4871b771-05ec-43fd-93da-6ff5470225fa)
 
